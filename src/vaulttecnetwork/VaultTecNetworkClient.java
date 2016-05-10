@@ -3,36 +3,47 @@ package vaulttecnetwork;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JWindow;
 
 public class VaultTecNetworkClient {
 
-private JFrame frame;
 private final ImageIcon BACKGROUNDIMAGE = new ImageIcon(getClass().getResource("/res/terminal_background.jpg"));
-	
+private JFrame frame;
+private JPanel cPanel;
+private JButton bOK;
+private int bOKx = 400, bOKy = 200;
+
 public VaultTecNetworkClient()
 {
-	frame = new JFrame("Vault-Tec Customer");
+	frame = new JFrame("Vault-Tec Network Customer");
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setSize(895, 533);
+	frame.setSize(870, 495);
 	frame.setLayout(new BorderLayout());
 	frame.setLocationRelativeTo(null);
 	
-	JPanel p1 = new JPanel()
-			{
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void paintComponent(Graphics g)
-			{
-				super.paintComponent(g);
-				g.drawImage(BACKGROUNDIMAGE.getImage(), 0, 0, null);
-			}
-			};
-	frame.add(p1, BorderLayout.CENTER);
+	cPanel = new JPanel()
+	{
+		private static final long serialVersionUID = 1L;
+		@Override
+		protected void paintComponent(Graphics g)
+		{
+			super.paintComponent(g);
+			g.drawImage(BACKGROUNDIMAGE.getImage(), -15, -15, null);
+		}};
+	cPanel.setLayout(null);
+	bOK = new JButton("OK");
+	
+	bOK.setBounds(bOKx, bOKy, 60, 50);
+	cPanel.add(bOK);
+	
+	frame.add(cPanel, BorderLayout.CENTER);
 	
 	frame.setVisible(true);
 }

@@ -14,6 +14,7 @@ public VaultTecNetworkServer()
 	frame = new JFrame("Vault-Tec Network Server. RobCo Industries.");
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	frame.setSize(400, 500);
+	frame.setResizable(false);
 	frame.setLayout(new BorderLayout());
 	frame.setLocationRelativeTo(null);
 	frame.setVisible(true);	
