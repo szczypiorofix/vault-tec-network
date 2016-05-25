@@ -5,11 +5,11 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
-public class VaultTecNetworkServer {
+public class VaultTecNetworkServerMain {
 
 private JFrame frame;
 	
-public VaultTecNetworkServer()
+public VaultTecNetworkServerMain()
 {
 	frame = new JFrame("Vault-Tec Network Server. RobCo Industries.");
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -26,7 +26,7 @@ EventQueue.invokeLater(new Runnable()
 {
 	public void run()
 	{
-		new VaultTecNetworkServer();
+		new VaultTecNetworkServerMain();
 	}
 });
 }
