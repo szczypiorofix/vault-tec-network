@@ -7,6 +7,7 @@ public VaultTecNetworkClientMain()
 {
 	VTNCModel vtncModel = new VTNCModel();
 	VTNCView vtncView = new VTNCView(vtncModel);
+	@SuppressWarnings("unused")
 	VTNCController vtncController = new VTNCController(vtncModel, vtncView);
 	vtncView.setVisible(true);
 }
