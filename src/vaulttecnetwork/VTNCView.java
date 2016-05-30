@@ -75,9 +75,9 @@ public VTNCView(VTNCModel mModel)
 	terminalTextArea.setOpaque(false);
 	terminalTextArea.setText(vtncModel.getDefText());
 
-	bExit = new Button("EXIT");
+	bExit = new Button(ButtonTypes.BEXIT);
 	bExit.setFont(falloutFont);
-	bAdd = new Button("Dodaj conieco...");
+	bAdd = new Button(ButtonTypes.BADD);
 	bAdd.setFont(falloutFont);
 	
 	panelN = new JPanel(new BorderLayout());

@@ -8,27 +8,37 @@ public class Button extends JButton{
 
 private static final long serialVersionUID = 1L;
 private final ImageIcon BUTTONIMAGE = new ImageIcon(getClass().getResource("/res/button.png"));
+private ButtonTypes typ;
 
 
 
 
 
-
-public Button(String title)
+public Button(ButtonTypes t)
 {
 	super();
-	
-	//setBorderPainted(false);
-	setText(title);
 	setOpaque(false);
+	typ = t;
 }
 	
 @Override
 protected void paintComponent(Graphics g)
 {
 	super.paintComponent(g);
-	g.drawImage(BUTTONIMAGE.getImage(), 0, 0, getWidth(), getHeight(), this);
-}};
+	switch (typ)
+	{
+	case BEXIT: {
+		g.drawImage(BUTTONIMAGE.getImage(), 0, 0, this);
+	}
+	case BADD: {
+		g.drawImage(BUTTONIMAGE.getImage(), 0, 0, 20, 20, this);
+	}
+	default: {
+		g.drawImage(BUTTONIMAGE.getImage(), 0, 0, 20, 20, this);
+	}
+	}
+}
+}
 
 
 
