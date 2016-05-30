@@ -30,12 +30,13 @@ private final InputStream FALLOUT_FONT = getClass().getResourceAsStream("/res/Fa
 private final String INITIAL_TERMINAL_TEXT_AREA = "";
 private Font falloutFont;
 private VTNCModel vtncModel;
-private JPanel cPanel, panelC, panelW, panelE, panelN, panelS;
+private JPanel cPanel, textPanel;
 private Button bExit, bAdd;
 private JTextArea terminalTextArea;
 private String terminalText;
 private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
+private int szerokosc = (int) screenSize.getWidth();
+private int wysokosc = (int) screenSize.getHeight();
 
 public VTNCView(VTNCModel mModel)
 {
@@ -58,7 +59,7 @@ public VTNCView(VTNCModel mModel)
 	} 
 	
 	
-	cPanel = new JPanel(new BorderLayout())
+	cPanel = new JPanel(null)
 	{
 		private static final long serialVersionUID = 2L;
 		@Override
@@ -68,39 +69,32 @@ public VTNCView(VTNCModel mModel)
 			screenSize = new Dimension(getWidth(), getHeight());
 			g.drawImage(BACKGROUNDIMAGE.getImage(), 0, 0, getWidth(), getHeight(), this);
 		}};
-	
+		
 	terminalTextArea = new JTextArea();
 	terminalTextArea.setFont(falloutFont);
 	terminalTextArea.setForeground(new Color(041,225,140));
 	terminalTextArea.setOpaque(false);
+	terminalTextArea.setEditable(false);
 	terminalTextArea.setText(vtncModel.getDefText());
 
+	textPanel = new JPanel(new BorderLayout());
+	textPanel.setBounds(400, 200, 400, 400);
+	textPanel.setOpaque(false);
+	textPanel.add(terminalTextArea);
+	
 	bExit = new Button(ButtonTypes.BEXIT);
 	bExit.setFont(falloutFont);
 	bAdd = new Button(ButtonTypes.BADD);
 	bAdd.setFont(falloutFont);
 	
-	panelN = new JPanel(new BorderLayout());
-	panelW = new JPanel(new BorderLayout());
-	panelS = new JPanel(new BorderLayout());
-	panelC = new JPanel(new BorderLayout());
-	panelE = new JPanel(new BorderLayout());
-	panelN.setOpaque(false);
-	panelS.setOpaque(false);
-	panelE.setOpaque(false);
-	panelW.setOpaque(false);
-	panelC.setOpaque(false);
+	bExit.setBounds(25, wysokosc - 90, 60, 60);
+	cPanel.add(bExit);
+	bAdd.setBounds(szerokosc - 95, wysokosc - 100, 60, 60);
+	cPanel.add(bAdd);
 	
-	panelS.add(bExit, BorderLayout.WEST);
-	panelN.add(bAdd, BorderLayout.EAST);
-	panelC.add(terminalTextArea, BorderLayout.CENTER);
-	
-	cPanel.add(panelN, BorderLayout.NORTH);
-	cPanel.add(panelS, BorderLayout.SOUTH);
-	cPanel.add(panelW, BorderLayout.WEST);
-	cPanel.add(panelE, BorderLayout.EAST);
-	cPanel.add(panelC, BorderLayout.CENTER);
-	this.add(cPanel, BorderLayout.CENTER);
+	cPanel.add(textPanel);
+
+	this.add(cPanel);
 }
 
 public void addButtonListener(ActionListener a)

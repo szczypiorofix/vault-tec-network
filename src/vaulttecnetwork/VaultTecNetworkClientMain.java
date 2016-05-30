@@ -9,6 +9,7 @@ public VaultTecNetworkClientMain()
 	VTNCView vtncView = new VTNCView(vtncModel);
 	VTNCController vtncController = new VTNCController(vtncModel, vtncView);
 	vtncView.setVisible(true);
+	vtncController.toString();
 }
 
 
