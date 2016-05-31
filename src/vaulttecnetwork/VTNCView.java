@@ -14,6 +14,7 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -28,10 +29,11 @@ private static final long serialVersionUID = 1L;
 private final ImageIcon BACKGROUNDIMAGE = new ImageIcon(getClass().getResource("/res/terminal_background.png"));
 private final InputStream FALLOUT_FONT = getClass().getResourceAsStream("/res/FalloutFont.ttf");
 private final String INITIAL_TERMINAL_TEXT_AREA = "";
-private Font falloutFont;
+public static Font falloutFont = null;
 private VTNCModel vtncModel;
 private JPanel cPanel, textPanel;
 private Button bExit, bAdd;
+private HashMap<Integer, Button> buttons = new HashMap<Integer, Button>();
 private JTextArea terminalTextArea;
 private String terminalText;
 private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -82,9 +84,21 @@ public VTNCView(VTNCModel mModel)
 	textPanel.setOpaque(false);
 	textPanel.add(terminalTextArea);
 	
-	bExit = new Button(ButtonTypes.BEXIT);
+	buttons.put(1, new Button(ButtonTypes.BOPTION, "> OPCJA 1"));
+	buttons.put(2, new Button(ButtonTypes.BOPTION, "> OPCJA 2"));
+	buttons.put(3, new Button(ButtonTypes.BOPTION, "> OPCJA 3"));
+	
+	buttons.get(1).setBounds(390, 250, 300, 50);
+	buttons.get(2).setBounds(390, 300, 300, 50);
+	buttons.get(3).setBounds(390, 350, 300, 50);
+
+	cPanel.add(buttons.get(1));
+	cPanel.add(buttons.get(2));
+	cPanel.add(buttons.get(3));
+	
+	bExit = new Button(ButtonTypes.BEXIT, "");
 	bExit.setFont(falloutFont);
-	bAdd = new Button(ButtonTypes.BADD);
+	bAdd = new Button(ButtonTypes.BADD, "");
 	bAdd.setFont(falloutFont);
 	
 	bExit.setBounds(25, wysokosc - 90, 60, 60);
