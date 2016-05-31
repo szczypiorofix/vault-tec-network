@@ -36,9 +36,11 @@ private Button bExit, bAdd;
 private HashMap<Integer, Button> buttons = new HashMap<Integer, Button>();
 private JTextArea terminalTextArea;
 private String terminalText;
-private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-private int szerokosc = (int) screenSize.getWidth();
-private int wysokosc = (int) screenSize.getHeight();
+private final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+private final int szerokosc = (int) screenSize.getWidth();
+private final int wysokosc = (int) screenSize.getHeight();
+private int selectedOption = 0;
+
 
 public VTNCView(VTNCModel mModel)
 {
@@ -60,7 +62,6 @@ public VTNCView(VTNCModel mModel)
 		e.printStackTrace();
 	} 
 	
-	
 	cPanel = new JPanel(null)
 	{
 		private static final long serialVersionUID = 2L;
@@ -68,7 +69,6 @@ public VTNCView(VTNCModel mModel)
 		protected void paintComponent(Graphics g)
 		{
 			super.paintComponent(g);
-			screenSize = new Dimension(getWidth(), getHeight());
 			g.drawImage(BACKGROUNDIMAGE.getImage(), 0, 0, getWidth(), getHeight(), this);
 		}};
 		
@@ -77,11 +77,13 @@ public VTNCView(VTNCModel mModel)
 	terminalTextArea.setForeground(new Color(041,225,140));
 	terminalTextArea.setOpaque(false);
 	terminalTextArea.setEditable(false);
+	terminalTextArea.setFocusable(false);
 	terminalTextArea.setText(vtncModel.getDefText());
 
 	textPanel = new JPanel(new BorderLayout());
 	textPanel.setBounds(400, 200, 400, 400);
 	textPanel.setOpaque(false);
+	textPanel.setFocusable(false);
 	textPanel.add(terminalTextArea);
 	
 	buttons.put(1, new Button(ButtonTypes.BOPTION, "> OPCJA 1"));
@@ -101,13 +103,12 @@ public VTNCView(VTNCModel mModel)
 	bAdd = new Button(ButtonTypes.BADD, "");
 	bAdd.setFont(falloutFont);
 	
+	
 	bExit.setBounds(25, wysokosc - 90, 60, 60);
 	cPanel.add(bExit);
 	bAdd.setBounds(szerokosc - 95, wysokosc - 100, 60, 60);
 	cPanel.add(bAdd);
-	
 	cPanel.add(textPanel);
-
 	this.add(cPanel);
 }
 
@@ -130,6 +131,11 @@ public void resetTerminalTextArea()
 public void setTerminalTextArea(String s)
 {
 	terminalTextArea.setText(s);
+}
+
+public void setSelectedOption(int s)
+{
+	
 }
 
 public JButton whichButton (ButtonTypes b)

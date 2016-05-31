@@ -73,6 +73,10 @@ protected void paintComponent(Graphics g)
 		g.drawImage(ADD_BUTTONIMAGE, 0, 0, getWidth(), getHeight(), this);
 		break;
 	}
+	case BOPTION:
+		break;
+	default:
+		break;
 	}
 }
 

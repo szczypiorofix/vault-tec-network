@@ -16,7 +16,7 @@ public VTNCController(VTNCModel mModel, VTNCView mView)
 	vtncView = mView;
 	
 	vtncView.addButtonListener(new ButtonListener());
-	vtncView.addKeyboardListener(new KeyEscapeListener());
+	vtncView.addKeyboardListener(new MyKeyListener());
 }
 
 
@@ -41,14 +41,26 @@ public void actionPerformed(ActionEvent a) {
 }
 
 
-class KeyEscapeListener implements KeyListener
+class MyKeyListener implements KeyListener
 {
 
 @Override
 public void keyPressed(KeyEvent key) {
-	if (key.getKeyCode() == KeyEvent.VK_ESCAPE)
+	
+	switch (key.getKeyCode())
 	{
+	case KeyEvent.VK_ESCAPE: {
 		System.exit(0);
+	}
+	case KeyEvent.VK_UP: {
+		System.exit(0);
+	}
+	case KeyEvent.VK_DOWN: {
+		System.exit(0);
+	}
+	default: {
+		break;
+	}
 	}
 }
 
