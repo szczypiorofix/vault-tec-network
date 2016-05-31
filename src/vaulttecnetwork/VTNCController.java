@@ -5,10 +5,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.JDialog;
+import javax.swing.JWindow;
+
 public class VTNCController {
 
 private VTNCModel vtncModel;
 private VTNCView vtncView;
+private int selected;
 
 public VTNCController(VTNCModel mModel, VTNCView mView)
 {
@@ -17,6 +21,7 @@ public VTNCController(VTNCModel mModel, VTNCView mView)
 	
 	vtncView.addButtonListener(new ButtonListener());
 	vtncView.addKeyboardListener(new MyKeyListener());
+	selected = vtncView.getSelectedOption();
 }
 
 
@@ -34,8 +39,11 @@ public void actionPerformed(ActionEvent a) {
 	
 	if (a.getSource() == vtncView.whichButton(ButtonTypes.BADD))
 	{
-		vtncModel.addText(vtncModel.getDefAddText());
-		vtncView.setTerminalTextArea(vtncModel.getText());	
+		vtncView.showHelp();
+		
+		
+		//vtncModel.addText(vtncModel.getDefAddText());
+		//vtncView.setTerminalTextArea(vtncModel.getText());	
 	}		
 	}	
 }
@@ -50,13 +58,42 @@ public void keyPressed(KeyEvent key) {
 	switch (key.getKeyCode())
 	{
 	case KeyEvent.VK_ESCAPE: {
-		System.exit(0);
+		//System.exit(0);
+		break;
 	}
 	case KeyEvent.VK_UP: {
-		System.exit(0);
+		if (selected >= 1) {
+			vtncView.deselectOption(selected);
+			if (selected == 1) {
+				selected=vtncView.getMaxOption();
+				vtncView.selectOption(selected);
+			}
+			else {
+				selected--;
+				vtncView.selectOption(selected);
+			}
+		}
+		break;
 	}
 	case KeyEvent.VK_DOWN: {
+		if (selected <= vtncView.getMaxOption()) {
+			vtncView.deselectOption(selected);
+			if (selected == vtncView.getMaxOption())
+			{
+				selected = 1;
+				vtncView.selectOption(selected);
+			}
+			else {
+				selected++;
+				vtncView.selectOption(selected);
+			}
+		}
+		break;
+	}
+	case KeyEvent.VK_ENTER: {
+		System.out.println(selected);
 		System.exit(0);
+		break;
 	}
 	default: {
 		break;

@@ -1,6 +1,7 @@
 package vaulttecnetwork;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
@@ -25,8 +26,6 @@ private ButtonTypes typ;
 private String text;
 
 
-
-
 public Button(ButtonTypes t, String txt)
 {
 	super();
@@ -41,23 +40,36 @@ public Button(ButtonTypes t, String txt)
 		
 	}
 	setOpaque(false);
-	//setBorderPainted(false);
 	setContentAreaFilled(false);
 	addMouseListener(this);
 	setFocusable(false);
-	setBorder(new EmptyBorder(5,5,5,5));
-	//this.setRolloverEnabled(true);
-	//this.setRolloverIcon(new ImageIcon(ADD_BUTTONIMAGE));
-	
+	setBorder(new EmptyBorder(5,5,5,5));	
 	if (typ == ButtonTypes.BOPTION) {
 		setHorizontalAlignment(SwingConstants.LEFT);
 		setForeground(FONT_GREEN);
 		setFont(VTNCView.falloutFont);
 		setText(text);
-		//setBorder(new LineBorder(Color.GRAY, 2, true)); 
 	}
 }
-	
+
+public void selectOption()
+{
+	setOpaque(true);
+	setBackground(FONT_SELECT_GREEN);
+	setForeground(FONT_DARK_GREEN);
+}
+
+public void deselectOption()
+{
+	setOpaque(false);
+	setBackground(null);
+	setForeground(FONT_GREEN);
+}
+
+public Button whichButton()
+{
+	return this;
+}
 
 @Override
 protected void paintComponent(Graphics g)
@@ -80,7 +92,6 @@ protected void paintComponent(Graphics g)
 	}
 }
 
-
 @Override
 public void mouseClicked(MouseEvent arg0) {}
 
@@ -89,13 +100,12 @@ public void mouseEntered(MouseEvent arg0) {
 	switch (typ)
 	{
 	case BOPTION: {
-		setOpaque(true);
-		setBackground(FONT_SELECT_GREEN);
-		setForeground(FONT_DARK_GREEN);
+		selectOption();
 		break;
 	}
 	default : {
 		setBorder(new LineBorder(Color.RED, 2, true));
+		break;
 	}
 	}
 }
@@ -106,9 +116,7 @@ public void mouseExited(MouseEvent arg0) {
 	switch (typ)
 	{
 	case BOPTION: {
-		setOpaque(false);
-		setBackground(null);
-		setForeground(FONT_GREEN);
+		deselectOption();
 		break;
 	}
 	default : {
