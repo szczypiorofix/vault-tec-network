@@ -5,9 +5,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import javax.swing.JDialog;
-import javax.swing.JWindow;
-
 public class VTNCController {
 
 private VTNCModel vtncModel;
@@ -37,10 +34,10 @@ public void actionPerformed(ActionEvent a) {
 		System.exit(0);
 	}
 	
-	if (a.getSource() == vtncView.whichButton(ButtonTypes.BADD))
+	if (a.getSource() == vtncView.whichButton(ButtonTypes.BHELP))
 	{
-		vtncView.showHelp();
-		
+		if (!vtncView.helpIsVisible()) vtncView.showHelp();
+		else vtncView.helpVisible(false);
 		
 		//vtncModel.addText(vtncModel.getDefAddText());
 		//vtncView.setTerminalTextArea(vtncModel.getText());	
@@ -93,6 +90,11 @@ public void keyPressed(KeyEvent key) {
 	case KeyEvent.VK_ENTER: {
 		System.out.println(selected);
 		System.exit(0);
+		break;
+	}
+	case KeyEvent.VK_F1: {
+		if (!vtncView.helpIsVisible()) vtncView.showHelp();
+		else vtncView.helpVisible(false);
 		break;
 	}
 	default: {

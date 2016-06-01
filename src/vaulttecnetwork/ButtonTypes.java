@@ -2,5 +2,5 @@ package vaulttecnetwork;
 
 public enum ButtonTypes {
 
-	BEXIT, BADD, BOPTION
+	BEXIT, BHELP, BOPTION
 }

@@ -1,7 +1,6 @@
 package vaulttecnetwork;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
@@ -21,7 +20,7 @@ private final Color FONT_GREEN = new Color(041,225,140);
 private final Color FONT_SELECT_GREEN = new Color(40, 180, 060);
 private final Color FONT_DARK_GREEN = new Color(10, 80, 10);
 private Image EXIT_BUTTONIMAGE;
-private Image ADD_BUTTONIMAGE;
+private Image HELP_BUTTONIMAGE;
 private ButtonTypes typ;
 private String text;
 
@@ -33,7 +32,7 @@ public Button(ButtonTypes t, String txt)
 	text = txt;
 	try {
 	EXIT_BUTTONIMAGE = ImageIO.read(getClass().getResource("/res/power_button.png"));
-	ADD_BUTTONIMAGE = ImageIO.read(getClass().getResource("/res/add_button.png"));
+	HELP_BUTTONIMAGE = ImageIO.read(getClass().getResource("/res/help_button.png"));
 	}
 	catch (IOException ioe)
 	{
@@ -66,11 +65,6 @@ public void deselectOption()
 	setForeground(FONT_GREEN);
 }
 
-public Button whichButton()
-{
-	return this;
-}
-
 @Override
 protected void paintComponent(Graphics g)
 {
@@ -81,8 +75,8 @@ protected void paintComponent(Graphics g)
 		g.drawImage(EXIT_BUTTONIMAGE, 0, 0, getWidth(), getHeight(), this);
 		break;
 	}
-	case BADD: {
-		g.drawImage(ADD_BUTTONIMAGE, 0, 0, getWidth(), getHeight(), this);
+	case BHELP: {
+		g.drawImage(HELP_BUTTONIMAGE, 0, 0, getWidth(), getHeight(), this);
 		break;
 	}
 	case BOPTION:

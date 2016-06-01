@@ -37,9 +37,10 @@ private final String INITIAL_TERMINAL_TEXT_AREA = "";
 public static Font falloutFont = null;
 private VTNCModel vtncModel;
 private JPanel cPanel, textPanel;
-private Button bExit, bAdd;
+private Button bExit, bHelp;
 private HashMap<Integer, Button> buttons = new HashMap<Integer, Button>();
 private JTextArea terminalTextArea;
+private JWindow helpWindow;
 private String terminalText;
 private final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 private final int szerokosc = (int) screenSize.getWidth();
@@ -61,7 +62,7 @@ public VTNCView(VTNCModel mModel)
 	this.setLocationRelativeTo(null);
 
 	try {
-		falloutFont = Font.createFont(Font.TRUETYPE_FONT, FALLOUT_FONT).deriveFont(22f);
+		falloutFont = Font.createFont(Font.TRUETYPE_FONT, FALLOUT_FONT).deriveFont(26f);
 	}
 	catch (FontFormatException | IOException e)
 	{
@@ -87,17 +88,17 @@ public VTNCView(VTNCModel mModel)
 	terminalTextArea.setText(vtncModel.getDefText());
 
 	textPanel = new JPanel(new BorderLayout());
-	textPanel.setBounds(400, 200, 400, 400);
+	textPanel.setBounds(120, 200, 420, 400);
 	textPanel.setOpaque(false);
 	textPanel.setFocusable(false);
 	textPanel.add(terminalTextArea);
 	
-	buttons.put(1, new Button(ButtonTypes.BOPTION, "> OPCJA 1"));
-	buttons.put(2, new Button(ButtonTypes.BOPTION, "> OPCJA 2"));
-	buttons.put(3, new Button(ButtonTypes.BOPTION, "> OPCJA 3"));
-	buttons.put(4, new Button(ButtonTypes.BOPTION, "> OPCJA 4"));
-	buttons.put(5, new Button(ButtonTypes.BOPTION, "> OPCJA 5"));
-	buttons.put(6, new Button(ButtonTypes.BOPTION, "> OPCJA 6"));
+	buttons.put(1, new Button(ButtonTypes.BOPTION, "> OPTION 1"));
+	buttons.put(2, new Button(ButtonTypes.BOPTION, "> OPTION 2"));
+	buttons.put(3, new Button(ButtonTypes.BOPTION, "> OPTION 3"));
+	buttons.put(4, new Button(ButtonTypes.BOPTION, "> OPTION 4"));
+	buttons.put(5, new Button(ButtonTypes.BOPTION, "> OPTION 5"));
+	buttons.put(6, new Button(ButtonTypes.BOPTION, "> OPTION 6"));
 	
 	rysujButtony(buttons);
 	
@@ -107,27 +108,33 @@ public VTNCView(VTNCModel mModel)
 	
 	bExit = new Button(ButtonTypes.BEXIT, "");
 	bExit.setFont(falloutFont);
-	bAdd = new Button(ButtonTypes.BADD, "");
-	bAdd.setFont(falloutFont);
+	bHelp = new Button(ButtonTypes.BHELP, "");
+	bHelp.setFont(falloutFont);
+	
+	defineHelpWindow();
 	
 	bExit.setBounds(25, wysokosc - 90, 60, 60);
 	cPanel.add(bExit);
-	bAdd.setBounds(szerokosc - 95, wysokosc - 100, 60, 60);
-	cPanel.add(bAdd);
+	bHelp.setBounds(szerokosc - 95, wysokosc - 100, 60, 60);
+	cPanel.add(bHelp);
 	cPanel.add(textPanel);
 	this.add(cPanel);
 }
 
-public void showHelp()
+public void defineHelpWindow()
 {
-	JWindow helpWindow = new JWindow();
+	helpWindow = new JWindow();
 	helpWindow.setBounds(szerokosc - 350, wysokosc - 300, 300, 150);
 	helpWindow.setBackground(Color.BLACK);
 	helpWindow.setForeground(Color.WHITE);
-	JTextArea helpWindowText = new JTextArea("POMOC DLA PROGRAMU...\n\nStrza³ki (góra/dó³) - poruszanie po menu\nEnter - wybór opcji\nPrzycisk POWER - zamkniecie\n Przycisk HELP - pomoc");
+	JTextArea helpWindowText = new JTextArea("  POMOC DLA PROGRAMU...\n\n  Strza³ki (góra/dó³) - poruszanie po menu\n  Enter - wybór opcji\n  Przycisk POWER - zamkniecie\n  Przycisk HELP (F1) - Pomoc");
 	helpWindowText.setEditable(false);
 	helpWindowText.setFocusable(false);
 	helpWindow.add(helpWindowText);
+}
+
+public void showHelp()
+{
 	helpWindow.setVisible(true);
 	this.addKeyListener(new KeyListener()
 	{
@@ -148,15 +155,25 @@ public void rysujButtony(HashMap<Integer, Button> b)
 {
 	for (int i = 1; i < buttons.size()+1; i++)
 	{
-		buttons.get(i).setBounds(390, 250 + (i*50), 300, 40);
+		buttons.get(i).setBounds(110, 250 + (i*50), 300, 40);
 		cPanel.add(buttons.get(i));
 	}
+}
+
+public boolean helpIsVisible()
+{
+	return helpWindow.isVisible();
+}
+
+public void helpVisible(boolean b)
+{
+	helpWindow.setVisible(b);
 }
 
 public void addButtonListener(ActionListener a)
 {
 	bExit.addActionListener(a);
-	bAdd.addActionListener(a);
+	bHelp.addActionListener(a);
 }
 
 public void addKeyboardListener(KeyListener k)
@@ -211,8 +228,8 @@ public JButton whichButton (ButtonTypes b)
 	case BEXIT: {
 		return bExit;
 	}
-	case BADD: {
-		return bAdd;
+	case BHELP: {
+		return bHelp;
 	}
 	default: return null;
 	}

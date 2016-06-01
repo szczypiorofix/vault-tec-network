@@ -3,7 +3,7 @@ package vaulttecnetwork;
 public class VTNCModel {
 
 	
-private final String DEFAULT_TEXT = "THIS IS A DEFAULT TEXT...";
+private final String DEFAULT_TEXT = "VAULT-TEC NETWORK CLIENT v.1.0\nEMPLOYEE ACCESS TERMINAL\n==========================================";
 private String text;
 private String defAddText = "Dupa!\n";
 	
