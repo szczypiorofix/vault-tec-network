@@ -3,16 +3,14 @@ package vaulttecnetwork;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 
-public class Button extends JButton implements MouseListener{
+public class Button extends JButton
+{
 
 private static final long serialVersionUID = 1L;
 
@@ -25,9 +23,10 @@ private ButtonTypes typ;
 private String text;
 
 
-public Button(ButtonTypes t, String txt)
+public Button(ButtonTypes t, String txt, String name)
 {
 	super();
+	setName(name);
 	typ = t;
 	text = txt;
 	try {
@@ -40,7 +39,6 @@ public Button(ButtonTypes t, String txt)
 	}
 	setOpaque(false);
 	setContentAreaFilled(false);
-	addMouseListener(this);
 	setFocusable(false);
 	setBorder(new EmptyBorder(5,5,5,5));	
 	if (typ == ButtonTypes.BOPTION) {
@@ -65,13 +63,18 @@ public void deselectOption()
 	setForeground(FONT_GREEN);
 }
 
+public ButtonTypes typButtona()
+{
+	return typ;
+}
+
 @Override
 protected void paintComponent(Graphics g)
 {
 	super.paintComponent(g);
 	switch (typ)
 	{
-	case BEXIT: {
+	case BPOWER: {
 		g.drawImage(EXIT_BUTTONIMAGE, 0, 0, getWidth(), getHeight(), this);
 		break;
 	}
@@ -85,46 +88,4 @@ protected void paintComponent(Graphics g)
 		break;
 	}
 }
-
-@Override
-public void mouseClicked(MouseEvent arg0) {}
-
-@Override
-public void mouseEntered(MouseEvent arg0) {
-	switch (typ)
-	{
-	case BOPTION: {
-		selectOption();
-		break;
-	}
-	default : {
-		setBorder(new LineBorder(Color.RED, 2, true));
-		break;
-	}
-	}
 }
-
-@Override
-public void mouseExited(MouseEvent arg0) {
-	
-	switch (typ)
-	{
-	case BOPTION: {
-		deselectOption();
-		break;
-	}
-	default : {
-		setBorder(new EmptyBorder(5,5,5,5));
-	}
-	}
-}
-
-@Override
-public void mousePressed(MouseEvent arg0) {}
-
-@Override
-public void mouseReleased(MouseEvent arg0) {}
-}
-
-
-

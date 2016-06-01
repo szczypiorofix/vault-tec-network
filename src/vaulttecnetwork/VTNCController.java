@@ -4,31 +4,99 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.net.URL;
 
 public class VTNCController {
 
+private final URL soundFile1 = getClass().getResource("/res/sound1.wav");
+private final URL soundFile2 = getClass().getResource("/res/sound2.wav");
 private VTNCModel vtncModel;
 private VTNCView vtncView;
 private int selected;
+
 
 public VTNCController(VTNCModel mModel, VTNCView mView)
 {
 	vtncModel = mModel;
 	vtncView = mView;
-	
-	vtncView.addButtonListener(new ButtonListener());
-	vtncView.addKeyboardListener(new MyKeyListener());
+	vtncView.addButtonListener(new ButtonClickListener());
+	vtncView.addKeyboardListener(new KeyPressedListener());
+	vtncView.addOptionButtonsMouseListener(new OptionButtonsMouseListener());
+	vtncView.addFunctionButtonsMouseListener(new FuncionButtonsMouseListener());
 	selected = vtncView.getSelectedOption();
 }
 
 
-class ButtonListener implements ActionListener
+class FuncionButtonsMouseListener implements MouseListener
+{
+	@Override
+	public void mouseClicked(MouseEvent e) {}
+	@Override
+	public void mousePressed(MouseEvent e) {}
+	@Override
+	public void mouseReleased(MouseEvent e) {}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		if (vtncView.getPowerButton() == e.getComponent())
+		{
+			vtncView.selectPowerButton();
+			vtncView.messageSound(soundFile2);
+		}
+		if (vtncView.getHelpButton() == e.getComponent())
+		{
+			vtncView.selectHelpButton();
+			vtncView.messageSound(soundFile2);
+		}
+	}
+	@Override
+	public void mouseExited(MouseEvent e) {
+		if (vtncView.getPowerButton() == e.getComponent())
+		{
+			vtncView.deselectPowerButton();
+		}
+		if (vtncView.getHelpButton() == e.getComponent())
+		{
+			vtncView.deselectHelpButton();
+		}
+	}
+}
+
+class OptionButtonsMouseListener implements MouseListener
+{
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		System.out.println(selected);
+		System.exit(0);
+	}
+	@Override
+	public void mousePressed(MouseEvent e) {}
+	@Override
+	public void mouseReleased(MouseEvent e) {}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		vtncView.messageSound(soundFile1);
+		vtncView.deselectOption(selected);
+		int i;
+		for (i = 0; i < vtncView.getOptionButtons().size(); i++)
+		  if (vtncView.getOptionButtons().get(i) == e.getComponent())
+		    break;
+		selected = i;
+		vtncView.selectOption(selected);
+	}
+	@Override
+	public void mouseExited(MouseEvent e) {}
+}
+
+
+class ButtonClickListener implements ActionListener
 {
 
 @Override
 public void actionPerformed(ActionEvent a) {
 		
-	if (a.getSource() == vtncView.whichButton(ButtonTypes.BEXIT))
+	if (a.getSource() == vtncView.whichButton(ButtonTypes.BPOWER))
 	{
 		vtncView.dispose();
 		System.exit(0);
@@ -37,16 +105,13 @@ public void actionPerformed(ActionEvent a) {
 	if (a.getSource() == vtncView.whichButton(ButtonTypes.BHELP))
 	{
 		if (!vtncView.helpIsVisible()) vtncView.showHelp();
-		else vtncView.helpVisible(false);
-		
-		//vtncModel.addText(vtncModel.getDefAddText());
-		//vtncView.setTerminalTextArea(vtncModel.getText());	
+		else vtncView.helpVisible(false);	
 	}		
 	}	
 }
 
 
-class MyKeyListener implements KeyListener
+class KeyPressedListener implements KeyListener
 {
 
 @Override
