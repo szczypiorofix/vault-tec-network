@@ -8,6 +8,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.URL;
 
+import javax.swing.JOptionPane;
+
 public class VTNCController {
 
 private final URL soundFile1 = getClass().getResource("/res/sound1.wav");
@@ -67,7 +69,8 @@ class OptionButtonsMouseListener implements MouseListener
 {
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		System.out.println(selected);
+		//System.out.println(selected);
+		JOptionPane.showMessageDialog(null, "Wybrano opcjê: " +selected);
 		System.exit(0);
 	}
 	@Override
@@ -124,6 +127,7 @@ public void keyPressed(KeyEvent key) {
 		break;
 	}
 	case KeyEvent.VK_UP: {
+		vtncView.messageSound(soundFile1);
 		if (selected >= 1) {
 			vtncView.deselectOption(selected);
 			if (selected == 1) {
@@ -138,6 +142,7 @@ public void keyPressed(KeyEvent key) {
 		break;
 	}
 	case KeyEvent.VK_DOWN: {
+		vtncView.messageSound(soundFile1);
 		if (selected <= vtncView.getMaxOption()) {
 			vtncView.deselectOption(selected);
 			if (selected == vtncView.getMaxOption())
@@ -153,13 +158,15 @@ public void keyPressed(KeyEvent key) {
 		break;
 	}
 	case KeyEvent.VK_ENTER: {
-		System.out.println(selected);
+		//System.out.println(selected);
+		JOptionPane.showMessageDialog(null, "Wybrano opcjê: " +selected);
 		System.exit(0);
 		break;
 	}
 	case KeyEvent.VK_F1: {
 		if (!vtncView.helpIsVisible()) vtncView.showHelp();
 		else vtncView.helpVisible(false);
+		vtncView.messageSound(soundFile1);
 		break;
 	}
 	default: {
