@@ -2,5 +2,5 @@ package vaulttecnetwork;
 
 public enum ButtonTypes {
 
-	BPOWER, BHELP, BOPTION
+	BPOWER, BHELP, BREFRESH, BOPTION
 }

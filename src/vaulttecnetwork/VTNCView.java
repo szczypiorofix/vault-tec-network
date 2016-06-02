@@ -14,7 +14,13 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -22,6 +28,7 @@ import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JWindow;
@@ -39,7 +46,7 @@ private final String INITIAL_TERMINAL_TEXT_AREA = "";
 public static Font falloutFont = null;
 private VTNCModel vtncModel;
 private JPanel cPanel, textPanel;
-private Button bPower, bHelp;
+private Button bPower, bHelp, bRefresh;
 private HashMap<Integer, Button> buttons = new HashMap<Integer, Button>();
 private JTextArea terminalTextArea;
 private JWindow helpWindow;
@@ -49,6 +56,10 @@ private final int szerokosc = (int) screenSize.getWidth();
 private final int wysokosc = (int) screenSize.getHeight();
 private int selectedOption = 0;
 private int max_option;
+private Date currentDate;
+private SimpleDateFormat sdf;
+private FileHandler fileHandler;
+private final static Logger LOGGER = Logger.getLogger(VaultTecNetworkClientMain.class.getName());
 
 
 public VTNCView(VTNCModel mModel)
@@ -68,7 +79,7 @@ public VTNCView(VTNCModel mModel)
 	}
 	catch (FontFormatException | IOException e)
 	{
-		e.printStackTrace();
+		zrzutLoga(e, true);
 	} 
 	
 	cPanel = new JPanel(null)
@@ -95,12 +106,12 @@ public VTNCView(VTNCModel mModel)
 	textPanel.setFocusable(false);
 	textPanel.add(terminalTextArea);
 	
-	buttons.put(1, new Button(ButtonTypes.BOPTION, "> OPTION 1", "OPCJA1"));
-	buttons.put(2, new Button(ButtonTypes.BOPTION, "> OPTION 2", "OPCJA2"));
-	buttons.put(3, new Button(ButtonTypes.BOPTION, "> OPTION 3", "OPCJA3"));
-	buttons.put(4, new Button(ButtonTypes.BOPTION, "> OPTION 4", "OPCJA4"));
-	buttons.put(5, new Button(ButtonTypes.BOPTION, "> OPTION 5", "OPCJA5"));
-	buttons.put(6, new Button(ButtonTypes.BOPTION, "> OPTION 6", "OPCJA6"));
+	buttons.put(1, new Button(ButtonTypes.BOPTION, "> OPTION 1"));
+	buttons.put(2, new Button(ButtonTypes.BOPTION, "> OPTION 2"));
+	buttons.put(3, new Button(ButtonTypes.BOPTION, "> OPTION 3"));
+	buttons.put(4, new Button(ButtonTypes.BOPTION, "> OPTION 4"));
+	buttons.put(5, new Button(ButtonTypes.BOPTION, "> OPTION 5"));
+	buttons.put(6, new Button(ButtonTypes.BOPTION, "> OPTION 6"));
 	
 	rysujButtony(buttons);
 		
@@ -108,10 +119,11 @@ public VTNCView(VTNCModel mModel)
 	setSelectedOption(1);
 	selectOption(getSelectedOption());
 	
-	bPower = new Button(ButtonTypes.BPOWER, "","");
+	bPower = new Button(ButtonTypes.BPOWER, "");
 	bPower.setFont(falloutFont);
-	bHelp = new Button(ButtonTypes.BHELP, "","");
+	bHelp = new Button(ButtonTypes.BHELP, "");
 	bHelp.setFont(falloutFont);
+	bRefresh = new Button(ButtonTypes.BREFRESH, "");
 	
 	defineHelpWindow();
 	
@@ -119,6 +131,8 @@ public VTNCView(VTNCModel mModel)
 	cPanel.add(bPower);
 	bHelp.setBounds(szerokosc - 95, wysokosc - 100, 60, 60);
 	cPanel.add(bHelp);
+	bRefresh.setBounds(szerokosc - 95, 10, 60, 60);
+	cPanel.add(bRefresh);
 	cPanel.add(textPanel);
 	this.add(cPanel);
 }
@@ -170,29 +184,18 @@ public void messageSound(URL s)
 	        beep.open(beepStream);
 	        beep.start();
 	    } catch(Exception ex) {
-	        ex.printStackTrace();
-	        System.exit(-1);
+	    	zrzutLoga(ex, true);
 	    }
 }
 
-public void selectPowerButton()
+public void selectButton(Button b)
 {
-	bPower.setBorder(new LineBorder(Color.RED, 2, true));
+	b.setBorder(new LineBorder(Color.RED, 2, true));
 }
 
-public void deselectPowerButton()
+public void deselectButton(Button b)
 {
-	bPower.setBorder(null);
-}
-
-public void selectHelpButton()
-{
-	bHelp.setBorder(new LineBorder(Color.RED, 2, true));
-}
-
-public void deselectHelpButton()
-{
-	bHelp.setBorder(null);
+	b.setBorder(null);
 }
 
 public ButtonTypes buttonType(Button b)
@@ -208,6 +211,11 @@ public Button getPowerButton()
 public Button getHelpButton()
 {
 	return bHelp;
+}
+
+public Button getRefreshButton()
+{
+	return bRefresh;
 }
 
 public HashMap<Integer, Button> getOptionButtons()
@@ -229,6 +237,7 @@ public void addButtonListener(ActionListener a)
 {
 	bPower.addActionListener(a);
 	bHelp.addActionListener(a);
+	bRefresh.addActionListener(a);
 }
 
 public void addOptionButtonsMouseListener(MouseListener m)
@@ -240,6 +249,7 @@ public void addFunctionButtonsMouseListener(MouseListener m)
 {
 	bPower.addMouseListener(m);
 	bHelp.addMouseListener(m);
+	bRefresh.addMouseListener(m);
 }
 
 public void addKeyboardListener(KeyListener k)
@@ -297,8 +307,42 @@ public JButton whichButton (ButtonTypes b)
 	case BHELP: {
 		return bHelp;
 	}
+	case BREFRESH: {
+		return bRefresh;
+	}
 	default: return null;
 	}
+}
+
+public void zrzutLoga(Exception e, Boolean closeProgram)
+{
+	currentDate = new Date();
+	sdf = new SimpleDateFormat("YYYY.MM.dd-HH.mm.ss");
+	try {
+		fileHandler = new FileHandler("client" +sdf.format(currentDate) +".log", false);
+	} catch (SecurityException se) {
+		se.printStackTrace();
+		System.exit(-1);
+	} catch (IOException ioe) {
+		ioe.printStackTrace();
+		System.exit(-1);
+	}
+	fileHandler.setFormatter(new SimpleFormatter());
+	fileHandler.setLevel(Level.ALL);
+	LOGGER.addHandler(fileHandler);
+	LOGGER.setUseParentHandlers(false);
+	LOGGER.log(Level.WARNING, e.getMessage(), e);
+	if (closeProgram) System.exit(-1);
+}
+
+public void showInfoPane(String msg)
+{
+	JOptionPane.showMessageDialog(this, msg, "", JOptionPane.INFORMATION_MESSAGE);
+}
+
+public void showError(String errMsg)
+{
+	JOptionPane.showMessageDialog(this, errMsg, "ERROR!", JOptionPane.ERROR_MESSAGE);
 }
 
 }

@@ -1,13 +1,20 @@
 package vaulttecnetwork;
 
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.URL;
-
 import javax.swing.JOptionPane;
 
 public class VTNCController {
@@ -17,6 +24,11 @@ private final URL soundFile2 = getClass().getResource("/res/sound2.wav");
 private VTNCModel vtncModel;
 private VTNCView vtncView;
 private int selected;
+private Socket socket;
+private ObjectOutputStream oos;
+private ObjectInputStream ois;
+private SendingData data;
+private Cursor defaultCursor;
 
 
 public VTNCController(VTNCModel mModel, VTNCView mView)
@@ -43,12 +55,17 @@ class FuncionButtonsMouseListener implements MouseListener
 	public void mouseEntered(MouseEvent e) {
 		if (vtncView.getPowerButton() == e.getComponent())
 		{
-			vtncView.selectPowerButton();
+			vtncView.selectButton(vtncView.getPowerButton());
 			vtncView.messageSound(soundFile2);
 		}
 		if (vtncView.getHelpButton() == e.getComponent())
 		{
-			vtncView.selectHelpButton();
+			vtncView.selectButton(vtncView.getHelpButton());
+			vtncView.messageSound(soundFile2);
+		}
+		if (vtncView.getRefreshButton() == e.getComponent())
+		{
+			vtncView.selectButton(vtncView.getRefreshButton());
 			vtncView.messageSound(soundFile2);
 		}
 	}
@@ -56,11 +73,15 @@ class FuncionButtonsMouseListener implements MouseListener
 	public void mouseExited(MouseEvent e) {
 		if (vtncView.getPowerButton() == e.getComponent())
 		{
-			vtncView.deselectPowerButton();
+			vtncView.deselectButton(vtncView.getPowerButton());
 		}
 		if (vtncView.getHelpButton() == e.getComponent())
 		{
-			vtncView.deselectHelpButton();
+			vtncView.deselectButton(vtncView.getHelpButton());
+		}
+		if (vtncView.getRefreshButton() == e.getComponent())
+		{
+			vtncView.deselectButton(vtncView.getRefreshButton());
 		}
 	}
 }
@@ -69,9 +90,7 @@ class OptionButtonsMouseListener implements MouseListener
 {
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		//System.out.println(selected);
-		JOptionPane.showMessageDialog(null, "Wybrano opcjê: " +selected);
-		System.exit(0);
+		vtncView.showInfoPane("Wybrano: "+selected);
 	}
 	@Override
 	public void mousePressed(MouseEvent e) {}
@@ -109,7 +128,47 @@ public void actionPerformed(ActionEvent a) {
 	{
 		if (!vtncView.helpIsVisible()) vtncView.showHelp();
 		else vtncView.helpVisible(false);	
-	}		
+	}	
+	
+	if (a.getSource() == vtncView.whichButton(ButtonTypes.BREFRESH))
+	{
+		socket = new Socket();
+		try {
+			defaultCursor = vtncView.getCursor();
+			vtncView.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			socket.connect(new InetSocketAddress("10.10.0.131", 1201), 5000); // 5 sek. timeout
+			if (oos == null) oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+			
+			data = new SendingData(1, new char[0], "Headline", "message");
+			oos.writeObject(data);
+			oos.flush();
+			
+			if (ois == null) ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+			data = (SendingData) ois.readObject();
+			vtncView.setCursor(defaultCursor);
+			vtncView.showInfoPane(data.getHeadline() + " "+data.getMessage());
+		}
+		catch (IOException ioe)
+		{
+			JOptionPane.showMessageDialog(vtncView, "B³¹d po³¹czenia z serwerem! "+ioe.getMessage(), "B³¹d !!!", JOptionPane.ERROR_MESSAGE);
+			vtncView.zrzutLoga(ioe, false);
+			vtncView.setCursor(defaultCursor);
+		}
+		catch (ClassNotFoundException cnfe)
+		{
+			vtncView.zrzutLoga(cnfe, true);
+		}
+		finally
+		{
+			try {
+			socket.close();
+			}
+			catch (IOException ioe)
+			{
+				vtncView.zrzutLoga(ioe, true);
+			}
+		}
+	}
 	}	
 }
 
@@ -158,9 +217,8 @@ public void keyPressed(KeyEvent key) {
 		break;
 	}
 	case KeyEvent.VK_ENTER: {
-		//System.out.println(selected);
-		JOptionPane.showMessageDialog(null, "Wybrano opcjê: " +selected);
-		System.exit(0);
+		vtncView.showInfoPane("Wybrano: "+selected);
+		//System.exit(0);
 		break;
 	}
 	case KeyEvent.VK_F1: {
@@ -180,7 +238,6 @@ public void keyReleased(KeyEvent key) {}
 
 @Override
 public void keyTyped(KeyEvent key) {}
-
 }
 
 }

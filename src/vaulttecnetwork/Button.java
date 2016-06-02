@@ -16,22 +16,23 @@ private static final long serialVersionUID = 1L;
 
 private final Color FONT_GREEN = new Color(041,225,140);
 private final Color FONT_SELECT_GREEN = new Color(40, 180, 060);
-private final Color FONT_DARK_GREEN = new Color(10, 80, 10);
+private final Color FONT_DARK_GREEN = new Color(5, 50, 5);
 private Image EXIT_BUTTONIMAGE;
 private Image HELP_BUTTONIMAGE;
+private Image REFRESH_BUTTONIMAGE;
 private ButtonTypes typ;
 private String text;
 
 
-public Button(ButtonTypes t, String txt, String name)
+public Button(ButtonTypes t, String txt)
 {
 	super();
-	setName(name);
 	typ = t;
 	text = txt;
 	try {
 	EXIT_BUTTONIMAGE = ImageIO.read(getClass().getResource("/res/power_button.png"));
 	HELP_BUTTONIMAGE = ImageIO.read(getClass().getResource("/res/help_button.png"));
+	REFRESH_BUTTONIMAGE = ImageIO.read(getClass().getResource("/res/refresh_button.png"));
 	}
 	catch (IOException ioe)
 	{
@@ -80,6 +81,10 @@ protected void paintComponent(Graphics g)
 	}
 	case BHELP: {
 		g.drawImage(HELP_BUTTONIMAGE, 0, 0, getWidth(), getHeight(), this);
+		break;
+	}
+	case BREFRESH: {
+		g.drawImage(REFRESH_BUTTONIMAGE, 0, 0, getWidth(), getHeight(), this);
 		break;
 	}
 	case BOPTION:
