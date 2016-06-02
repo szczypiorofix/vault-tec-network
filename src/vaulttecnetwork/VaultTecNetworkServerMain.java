@@ -2,17 +2,22 @@ package vaulttecnetwork;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,7 +41,7 @@ private int count = 1;
 private JFrame frame;
 private JTextArea info;
 private JPanel infoPane, buttonPane;
-private JButton addMessageButton;
+private JButton addMessageButton, checkIPButton;
 private JScrollPane infoScroll;
 private ServerSocket serverSocket;
 private Socket tempSocket;
@@ -60,6 +65,45 @@ public VaultTecNetworkServerMain()
 	infoPane = new JPanel(new BorderLayout());
 	buttonPane = new JPanel();
 	addMessageButton = new JButton("Dodaj wiadomoœæ");
+	checkIPButton = new JButton("Moje IP");
+	checkIPButton.addActionListener(new ActionListener()
+	{
+		private URL whatismyip;
+		private BufferedReader readerIP;
+		private String externalIP;
+		private Boolean checkIP;
+		
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			checkIP = true;			
+			try {
+				whatismyip = new URL("http://checkip.amazonaws.com");
+				readerIP = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
+				externalIP = readerIP.readLine();
+			}
+			catch (Exception uhe)
+			{
+				checkIP = false;
+				checkIPButton.setText("B³¹d po³¹czenia!");
+			}
+			finally
+			{
+				if (readerIP != null) 
+					{
+						try {
+						readerIP.close();
+						}
+						catch (Exception e1)
+						{
+							e1.printStackTrace();
+							System.exit(-1);
+						}
+					}
+			}
+			if (checkIP) checkIPButton.setText("Moje IP: " +externalIP);
+		}
+	});
 	info = new JTextArea();
 	info.setEditable(false);
 	info.setLineWrap(true);
@@ -67,17 +111,18 @@ public VaultTecNetworkServerMain()
 	infoScroll = new JScrollPane(info);
 	infoPane.add(infoScroll);
 	buttonPane.add(addMessageButton);
+	buttonPane.add(checkIPButton);
 	frame.add(infoPane, BorderLayout.CENTER);
 	frame.add(buttonPane, BorderLayout.SOUTH);
 	frame.addWindowListener(this);
 	frame.setVisible(true);
 	new Thread(new Runnable()
+		{
+			public void run()
 			{
-				public void run()
-				{
-					serverStart();
-				}
-			}).start();
+				serverStart();
+			}
+		}).start();
 }
 
 public void zrzutLoga(Exception e)
