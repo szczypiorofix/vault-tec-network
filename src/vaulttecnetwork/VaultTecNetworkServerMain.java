@@ -1,7 +1,9 @@
 package vaulttecnetwork;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -25,12 +27,14 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 public class VaultTecNetworkServerMain implements WindowListener{
 
@@ -40,9 +44,9 @@ private final int SERVER_PORT = 1201;
 private int count = 1;
 private JFrame frame;
 private JTextArea info;
-private JPanel infoPane, buttonPane;
+private JPanel infoPane, buttonPane, newsPane;
 private JButton addMessageButton, checkIPButton;
-private JScrollPane infoScroll;
+private JScrollPane infoScroll, newsScroll;
 private ServerSocket serverSocket;
 private Socket tempSocket;
 private ObjectInputStream tempInputStream;
@@ -51,20 +55,80 @@ private HashMap<Integer, ServerConnectors> users;
 private Date currentDate;
 private SimpleDateFormat sdf;
 private SendingData data;
+private HashMap<Integer, News> news;
+private HashMap<Integer, Buttons> newsList;
+private int numberOfNews = 0;
+private JDialog newNewsDialog;
+private JTextField newNewsDialogHeadline;
+private JTextArea newNewsDialogMessage;
+private JButton newNewsDialogAccept;
+private JPanel newNewsDialogHeadlinePanel, newNewsDialogMessagePanel, newNewsDialogButtonPanel;
+private JScrollPane newNewsDialogScrollPane;
+private final JLabel newNewsDialogHeadlineTitle = new JLabel("Nag³ówek");
 
 
-
-public VaultTecNetworkServerMain()
-{	
+public void startGUI()
+{
 	frame = new JFrame("Vault-Tec Network Server. RobCo Industries.");
 	frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-	frame.setSize(450, 500);
+	frame.setSize(550, 500);
 	frame.setResizable(false);
 	frame.setLayout(new BorderLayout());
 	frame.setLocationRelativeTo(null);
 	infoPane = new JPanel(new BorderLayout());
 	buttonPane = new JPanel();
-	addMessageButton = new JButton("Dodaj wiadomoœæ");
+	newsPane = new JPanel();
+	newsPane.setPreferredSize(new Dimension(180, 80));
+	
+	newNewsDialogHeadline = new JTextField(20);
+	newNewsDialogMessage = new JTextArea(25,35);
+	newNewsDialogAccept = new JButton("Zapisz niusa");
+	newNewsDialogHeadlinePanel = new JPanel(new FlowLayout()); 
+	newNewsDialogMessagePanel = new JPanel(new BorderLayout());
+	newNewsDialogButtonPanel = new JPanel(new FlowLayout());
+	newNewsDialogScrollPane = new JScrollPane(newNewsDialogMessagePanel);
+	
+	addMessageButton = new JButton("Dodaj niusa");
+	addMessageButton.addActionListener(new ActionListener()
+	{
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			newNewsDialog = new JDialog(frame, "Dodaj kolejnego niusa", true);
+			newNewsDialog.setSize(420, 400);
+			newNewsDialog.setLayout(new BorderLayout());
+			newNewsDialog.setLocationRelativeTo(frame);
+			//newNewsDialog.setResizable(false);
+			
+			newNewsDialogMessage.setWrapStyleWord(true);
+			newNewsDialogMessage.setWrapStyleWord(true);
+			
+			newNewsDialogHeadlinePanel.add(newNewsDialogHeadlineTitle);
+			newNewsDialogHeadlinePanel.add(newNewsDialogHeadline);
+			newNewsDialogMessagePanel.add(newNewsDialogMessage, BorderLayout.CENTER);
+			newNewsDialogButtonPanel.add(newNewsDialogAccept);
+			newNewsDialog.add(newNewsDialogHeadlinePanel, BorderLayout.NORTH);
+			newNewsDialog.add(newNewsDialogScrollPane, BorderLayout.CENTER);
+			newNewsDialog.add(newNewsDialogButtonPanel, BorderLayout.SOUTH);
+			newNewsDialog.setVisible(true);
+		}
+	});
+	
+	newNewsDialogAccept.addActionListener(new ActionListener()
+	{
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			newNewsDialog.dispose();
+			numberOfNews++;
+			news.put(numberOfNews, new News(numberOfNews, newNewsDialogHeadline.getText().toString(), newNewsDialogMessage.getText().toString()));
+			newsList.put(numberOfNews, new Buttons(news.get(numberOfNews).getHeadline(), numberOfNews));
+			newsList.get(numberOfNews).addActionListener(new NewsButtonListener(numberOfNews));
+			newsPane.setPreferredSize(new Dimension(180, (numberOfNews*60)));
+			rysujListeNiusow(newsPane, newsList, news);
+		}
+	});
+	
 	checkIPButton = new JButton("Moje IP");
 	checkIPButton.addActionListener(new ActionListener()
 	{
@@ -109,20 +173,47 @@ public VaultTecNetworkServerMain()
 	info.setLineWrap(true);
 	info.setWrapStyleWord(true);
 	infoScroll = new JScrollPane(info);
+	newsScroll = new JScrollPane(newsPane);
 	infoPane.add(infoScroll);
 	buttonPane.add(addMessageButton);
 	buttonPane.add(checkIPButton);
 	frame.add(infoPane, BorderLayout.CENTER);
 	frame.add(buttonPane, BorderLayout.SOUTH);
+	frame.add(newsScroll, BorderLayout.EAST);
 	frame.addWindowListener(this);
 	frame.setVisible(true);
-	new Thread(new Runnable()
-		{
-			public void run()
-			{
-				serverStart();
-			}
-		}).start();
+}
+
+public VaultTecNetworkServerMain()
+{	
+	super();
+}
+
+public class NewsButtonListener implements ActionListener
+{
+
+private int number;	
+
+public NewsButtonListener(int i)
+{
+	number = i;
+}
+	
+@Override
+public void actionPerformed(ActionEvent e)
+{
+	JFrame r = new JFrame(news.get(number).getHeadline());
+	r.setSize(400, 400);
+	r.setLocationRelativeTo(null);
+	r.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+	r.setLayout(new BorderLayout());
+	JTextArea t = new JTextArea();
+	t.setText(news.get(number).getNewstText());
+	t.setEditable(false);
+	r.add(t, BorderLayout.CENTER);
+	r.setVisible(true);
+}
+	
 }
 
 public void zrzutLoga(Exception e)
@@ -152,10 +243,25 @@ public void message(String name, String msg)
 	info.append(" "+sdf.format(currentDate) +" "+name +": " +msg +"\n");
 }
 
+public void rysujListeNiusow(JPanel p, HashMap<Integer, Buttons> l, HashMap<Integer, News> n)
+{
+	p.setLayout(null);
+	for (int i = 0; i < l.size(); i++)
+	{
+		p.add(l.get(i+1));
+	}
+	newsScroll.repaint();
+	newsScroll.revalidate();
+}
+
 public void serverStart()
 {
 	message("Server", "Hello Staffi!");
 	users = new HashMap<Integer, ServerConnectors>();
+	news = new HashMap<Integer, News>();
+	newsList = new HashMap<Integer, Buttons>();
+	
+	rysujListeNiusow(newsPane, newsList, news);
 	
 	try {
 		serverSocket = new ServerSocket(SERVER_PORT);
@@ -170,18 +276,20 @@ public void serverStart()
 			users.put(count, new ServerConnectors(count, new char[0], tempSocket, tempInputStream, tempOutputStream));
 			try {
 			data = (SendingData) tempInputStream.readObject();
-			message("Serwer", data.getWho() +" " +data.getHeadline() +" " +data.getMessage());
+			message("Serwer " +data.getHeadline()," " +data.getMessage());
 			}
 			catch (ClassNotFoundException cnfe)
 			{
 				cnfe.printStackTrace();
 				zrzutLoga(cnfe);
 			}
-			data.setMessage("NEW MESSAGE!");
+			if (news.size() > 0) 
+				{
+				data.setHeadline(news.get(1).getHeadline());
+				data.setMessage(news.get(1).getNewstText());
+				}
 			users.get(count).getOutputStream().writeObject(data);
 			users.get(count).getOutputStream().flush();
-			
-			new Thread(new ServerThread(users, count)).start();
 			count++;
 		}
 	}
@@ -202,47 +310,6 @@ public void serverStart()
 	}
 }
 
-public class ServerThread implements Runnable
-{
-
-private HashMap<Integer, ServerConnectors> connectors;
-private int number;
-private SendingData threadData;
-
-
-public ServerThread(HashMap<Integer, ServerConnectors> c, int i)
-{
-	connectors = c;
-	number = i;
-}
-	
-public void run()
-{
-	while (true)
-	{
-		message("OK", "dzia³a w¹tek!");
-		try {
-		threadData = (SendingData) connectors.get(number).getInputStream().readObject();
-		message("OK", threadData.getHeadline() +" " +threadData.getMessage());
-		}
-		catch (ClassNotFoundException | IOException e)
-		{
-			zrzutLoga(e);
-		}	
-	}
-}
-}
-
-public static void main(String[] args) {
-
-EventQueue.invokeLater(new Runnable()
-{
-	public void run()
-	{
-		new VaultTecNetworkServerMain();
-	}
-});
-}
 
 @Override
 public void windowOpened(WindowEvent e) {}
@@ -266,5 +333,26 @@ public void windowActivated(WindowEvent e) {}
 
 @Override
 public void windowDeactivated(WindowEvent e) {}
+
+	
+public static void main(String[] args) {
+
+	VaultTecNetworkServerMain vtnsMain = new VaultTecNetworkServerMain();
+	vtnsMain.startGUI();
+	vtnsMain.serverStart();
+}
+
+
+private class Buttons extends JButton
+{
+
+private static final long serialVersionUID = 1L;
+
+private Buttons(String s, int n)
+{
+	super(s);
+	setBounds(10, -50 + (n*60), 120, 45);
+}
+}
 
 }

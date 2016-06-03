@@ -15,6 +15,8 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.util.HashMap;
+
 import javax.swing.JOptionPane;
 
 public class VTNCController {
@@ -29,6 +31,8 @@ private ObjectOutputStream oos;
 private ObjectInputStream ois;
 private SendingData data;
 private Cursor defaultCursor;
+private OptionButtonsMouseListener optionButtonListnener;
+private HashMap<Integer, News> news;
 
 
 public VTNCController(VTNCModel mModel, VTNCView mView)
@@ -37,9 +41,11 @@ public VTNCController(VTNCModel mModel, VTNCView mView)
 	vtncView = mView;
 	vtncView.addButtonListener(new ButtonClickListener());
 	vtncView.addKeyboardListener(new KeyPressedListener());
-	vtncView.addOptionButtonsMouseListener(new OptionButtonsMouseListener());
+	optionButtonListnener = new OptionButtonsMouseListener();
+	vtncView.addOptionButtonsMouseListener(optionButtonListnener);
 	vtncView.addFunctionButtonsMouseListener(new FuncionButtonsMouseListener());
 	selected = vtncView.getSelectedOption();
+	news = new HashMap<Integer, News>();
 }
 
 
@@ -90,7 +96,7 @@ class OptionButtonsMouseListener implements MouseListener
 {
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		vtncView.showInfoPane("Wybrano: "+selected);
+		if (news.size() > 0) vtncView.showInfoPane(news.get(selected).getHeadline(), news.get(selected).getNewstText());
 	}
 	@Override
 	public void mousePressed(MouseEvent e) {}
@@ -137,16 +143,22 @@ public void actionPerformed(ActionEvent a) {
 			defaultCursor = vtncView.getCursor();
 			vtncView.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 			socket.connect(new InetSocketAddress("10.10.0.131", 1201), 5000); // 5 sek. timeout
-			if (oos == null) oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+			oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 			
-			data = new SendingData(1, new char[0], "Headline", "message");
+			data = new SendingData("Headline from client", "message from client");
 			oos.writeObject(data);
 			oos.flush();
 			
-			if (ois == null) ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+			ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 			data = (SendingData) ois.readObject();
 			vtncView.setCursor(defaultCursor);
-			vtncView.showInfoPane(data.getHeadline() + " "+data.getMessage());
+
+			vtncView.setMaxOption(vtncView.getMaxOption()+1);
+			vtncView.getOptionButtons().put(vtncView.getMaxOption(), new Button(ButtonTypes.BOPTION, "> " +data.getHeadline()));
+			news.put(vtncView.getMaxOption(), new News(vtncView.getMaxOption(), data.getHeadline(), data.getMessage()));
+			vtncView.setMaxOption(vtncView.getOptionButtons().size());
+			vtncView.rysujButtony(vtncView.getOptionButtons());
+			vtncView.addOptionButtonsMouseListener(optionButtonListnener);
 		}
 		catch (IOException ioe)
 		{
@@ -217,7 +229,8 @@ public void keyPressed(KeyEvent key) {
 		break;
 	}
 	case KeyEvent.VK_ENTER: {
-		vtncView.showInfoPane("Wybrano: "+selected);
+		//vtncView.showInfoPane("Wybrano: "+selected);
+		if (news.size() > 0) vtncView.showInfoPane(news.get(selected).getHeadline(), news.get(selected).getNewstText());
 		//System.exit(0);
 		break;
 	}

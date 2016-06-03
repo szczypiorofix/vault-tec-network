@@ -27,6 +27,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -106,18 +107,14 @@ public VTNCView(VTNCModel mModel)
 	textPanel.setFocusable(false);
 	textPanel.add(terminalTextArea);
 	
-	buttons.put(1, new Button(ButtonTypes.BOPTION, "> OPTION 1"));
-	buttons.put(2, new Button(ButtonTypes.BOPTION, "> OPTION 2"));
-	buttons.put(3, new Button(ButtonTypes.BOPTION, "> OPTION 3"));
-	buttons.put(4, new Button(ButtonTypes.BOPTION, "> OPTION 4"));
-	buttons.put(5, new Button(ButtonTypes.BOPTION, "> OPTION 5"));
-	buttons.put(6, new Button(ButtonTypes.BOPTION, "> OPTION 6"));
+	//buttons.put(1, new Button(ButtonTypes.BOPTION, "> OPTION 1"));
+	//buttons.put(2, new Button(ButtonTypes.BOPTION, "> OPTION 2"));
 	
 	rysujButtony(buttons);
 		
 	setMaxOption(buttons.size());
 	setSelectedOption(1);
-	selectOption(getSelectedOption());
+	if (buttons.size() > 0) selectOption(getSelectedOption()); 
 	
 	bPower = new Button(ButtonTypes.BPOWER, "");
 	bPower.setFont(falloutFont);
@@ -174,6 +171,8 @@ public void rysujButtony(HashMap<Integer, Button> b)
 		buttons.get(i).setBounds(110, 250 + (i*50), 300, 40);
 		cPanel.add(buttons.get(i));
 	}
+	cPanel.revalidate();
+	cPanel.repaint();
 }
 
 public void messageSound(URL s)
@@ -335,9 +334,15 @@ public void zrzutLoga(Exception e, Boolean closeProgram)
 	if (closeProgram) System.exit(-1);
 }
 
-public void showInfoPane(String msg)
+public void showInfoPane(String head, String msg)
 {
-	JOptionPane.showMessageDialog(this, msg, "", JOptionPane.INFORMATION_MESSAGE);
+	//JOptionPane.showMessageDialog(this, msg, "", JOptionPane.INFORMATION_MESSAGE);
+	JDialog d = new JDialog(this, head, true);
+	d.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+	d.setSize(400, 400);
+	d.setLocationRelativeTo(this);
+	d.add(new JTextArea(msg));
+	d.setVisible(true);
 }
 
 public void showError(String errMsg)
