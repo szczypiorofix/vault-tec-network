@@ -29,7 +29,6 @@ private int selected;
 private Socket socket;
 private ObjectOutputStream oos;
 private ObjectInputStream ois;
-private SendingData data;
 private Cursor defaultCursor;
 private OptionButtonsMouseListener optionButtonListnener;
 private HashMap<Integer, News> news;
@@ -143,22 +142,24 @@ public void actionPerformed(ActionEvent a) {
 			defaultCursor = vtncView.getCursor();
 			vtncView.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 			socket.connect(new InetSocketAddress("10.10.0.131", 1201), 5000); // 5 sek. timeout
-			oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-			
-			data = new SendingData("Headline from client", "message from client");
-			oos.writeObject(data);
-			oos.flush();
 			
 			ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-			data = (SendingData) ois.readObject();
+			news = (HashMap<Integer, News>) ois.readObject();
 			vtncView.setCursor(defaultCursor);
-
-			vtncView.setMaxOption(vtncView.getMaxOption()+1);
-			vtncView.getOptionButtons().put(vtncView.getMaxOption(), new Button(ButtonTypes.BOPTION, "> " +data.getHeadline()));
-			news.put(vtncView.getMaxOption(), new News(vtncView.getMaxOption(), data.getHeadline(), data.getMessage()));
+			
+			for (int i = 1; i < news.size()+1; i++)
+			{
+				vtncView.getOptionButtons().put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
+			}
+			
+			// TODO Dlaczego mysz nie zaznacza opcji po dodaniu???
+			vtncView.setSelectedOption(1);
+			
+			// TODO Ci¹gle zaznacza pierwsz¹ opcjê !!
+			
 			vtncView.setMaxOption(vtncView.getOptionButtons().size());
 			vtncView.rysujButtony(vtncView.getOptionButtons());
-			vtncView.addOptionButtonsMouseListener(optionButtonListnener);
+			vtncView.addOptionButtonsMouseListener(optionButtonListnener); 
 		}
 		catch (IOException ioe)
 		{

@@ -1,8 +1,11 @@
 package vaulttecnetwork;
 
-public class News {
+import java.io.Serializable;
 
-	
+public class News implements Serializable{
+
+private static final long serialVersionUID = 1L;
+
 private int number;
 private String headline;
 private String newstText;

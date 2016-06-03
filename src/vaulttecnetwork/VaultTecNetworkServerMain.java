@@ -54,7 +54,6 @@ private ObjectOutputStream tempOutputStream;
 private HashMap<Integer, ServerConnectors> users;
 private Date currentDate;
 private SimpleDateFormat sdf;
-private SendingData data;
 private HashMap<Integer, News> news;
 private HashMap<Integer, Buttons> newsList;
 private int numberOfNews = 0;
@@ -271,25 +270,14 @@ public void serverStart()
 		while (true)
 		{
 			tempSocket = serverSocket.accept();
-			tempInputStream = new ObjectInputStream(new BufferedInputStream(tempSocket.getInputStream()));
+			message("Serwer", "¯¹danie od klienta ...");
 			tempOutputStream = new ObjectOutputStream(new BufferedOutputStream(tempSocket.getOutputStream()));
-			users.put(count, new ServerConnectors(count, new char[0], tempSocket, tempInputStream, tempOutputStream));
-			try {
-			data = (SendingData) tempInputStream.readObject();
-			message("Serwer " +data.getHeadline()," " +data.getMessage());
+			users.put(count, new ServerConnectors(tempSocket, tempInputStream, tempOutputStream));
+
+			if (news.size() > 0) {
+				users.get(count).getOutputStream().writeObject(news);
+				users.get(count).getOutputStream().flush();
 			}
-			catch (ClassNotFoundException cnfe)
-			{
-				cnfe.printStackTrace();
-				zrzutLoga(cnfe);
-			}
-			if (news.size() > 0) 
-				{
-				data.setHeadline(news.get(1).getHeadline());
-				data.setMessage(news.get(1).getNewstText());
-				}
-			users.get(count).getOutputStream().writeObject(data);
-			users.get(count).getOutputStream().flush();
 			count++;
 		}
 	}
