@@ -40,8 +40,7 @@ public VTNCController(VTNCModel mModel, VTNCView mView)
 	vtncView = mView;
 	vtncView.addButtonListener(new ButtonClickListener());
 	vtncView.addKeyboardListener(new KeyPressedListener());
-	optionButtonListnener = new OptionButtonsMouseListener();
-	vtncView.addOptionButtonsMouseListener(optionButtonListnener);
+	
 	vtncView.addFunctionButtonsMouseListener(new FuncionButtonsMouseListener());
 	selected = vtncView.getSelectedOption();
 	news = new HashMap<Integer, News>();
@@ -141,7 +140,7 @@ public void actionPerformed(ActionEvent a) {
 		try {
 			defaultCursor = vtncView.getCursor();
 			vtncView.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			socket.connect(new InetSocketAddress("10.10.0.131", 1201), 5000); // 5 sek. timeout
+			socket.connect(new InetSocketAddress("127.0.0.1", 1201), 5000); // 5 sek. timeout
 			
 			ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 			news = (HashMap<Integer, News>) ois.readObject();
@@ -151,15 +150,11 @@ public void actionPerformed(ActionEvent a) {
 			{
 				vtncView.getOptionButtons().put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
 			}
-			
-			// TODO Dlaczego mysz nie zaznacza opcji po dodaniu???
-			vtncView.setSelectedOption(1);
-			
-			// TODO Ci¹gle zaznacza pierwsz¹ opcjê !!
+			optionButtonListnener = new OptionButtonsMouseListener();
+			vtncView.addOptionButtonsMouseListener(optionButtonListnener);
 			
 			vtncView.setMaxOption(vtncView.getOptionButtons().size());
 			vtncView.rysujButtony(vtncView.getOptionButtons());
-			vtncView.addOptionButtonsMouseListener(optionButtonListnener); 
 		}
 		catch (IOException ioe)
 		{

@@ -3,12 +3,10 @@ package vaulttecnetwork;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -70,7 +68,7 @@ public void startGUI()
 {
 	frame = new JFrame("Vault-Tec Network Server. RobCo Industries.");
 	frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-	frame.setSize(550, 500);
+	frame.setSize(650, 500);
 	frame.setResizable(false);
 	frame.setLayout(new BorderLayout());
 	frame.setLocationRelativeTo(null);
@@ -80,12 +78,28 @@ public void startGUI()
 	newsPane.setPreferredSize(new Dimension(180, 80));
 	
 	newNewsDialogHeadline = new JTextField(20);
-	newNewsDialogMessage = new JTextArea(25,35);
+	newNewsDialogMessage = new JTextArea(25,30);
+	newNewsDialogMessage.setWrapStyleWord(true);
+	newNewsDialogMessage.setWrapStyleWord(true);
 	newNewsDialogAccept = new JButton("Zapisz niusa");
 	newNewsDialogHeadlinePanel = new JPanel(new FlowLayout()); 
 	newNewsDialogMessagePanel = new JPanel(new BorderLayout());
 	newNewsDialogButtonPanel = new JPanel(new FlowLayout());
 	newNewsDialogScrollPane = new JScrollPane(newNewsDialogMessagePanel);
+	
+	newNewsDialog = new JDialog(frame, "Dodaj kolejnego niusa", true);
+	newNewsDialog.setSize(420, 400);
+	newNewsDialog.setLayout(new BorderLayout());
+	newNewsDialog.setLocationRelativeTo(frame);
+	//newNewsDialog.setResizable(false);
+	
+	newNewsDialogHeadlinePanel.add(newNewsDialogHeadlineTitle);
+	newNewsDialogHeadlinePanel.add(newNewsDialogHeadline);
+	newNewsDialogMessagePanel.add(newNewsDialogMessage, BorderLayout.CENTER);
+	newNewsDialogButtonPanel.add(newNewsDialogAccept);
+	newNewsDialog.add(newNewsDialogHeadlinePanel, BorderLayout.NORTH);
+	newNewsDialog.add(newNewsDialogScrollPane, BorderLayout.CENTER);
+	newNewsDialog.add(newNewsDialogButtonPanel, BorderLayout.SOUTH);
 	
 	addMessageButton = new JButton("Dodaj niusa");
 	addMessageButton.addActionListener(new ActionListener()
@@ -93,22 +107,8 @@ public void startGUI()
 		@Override
 		public void actionPerformed(ActionEvent e)
 		{
-			newNewsDialog = new JDialog(frame, "Dodaj kolejnego niusa", true);
-			newNewsDialog.setSize(420, 400);
-			newNewsDialog.setLayout(new BorderLayout());
-			newNewsDialog.setLocationRelativeTo(frame);
-			//newNewsDialog.setResizable(false);
-			
-			newNewsDialogMessage.setWrapStyleWord(true);
-			newNewsDialogMessage.setWrapStyleWord(true);
-			
-			newNewsDialogHeadlinePanel.add(newNewsDialogHeadlineTitle);
-			newNewsDialogHeadlinePanel.add(newNewsDialogHeadline);
-			newNewsDialogMessagePanel.add(newNewsDialogMessage, BorderLayout.CENTER);
-			newNewsDialogButtonPanel.add(newNewsDialogAccept);
-			newNewsDialog.add(newNewsDialogHeadlinePanel, BorderLayout.NORTH);
-			newNewsDialog.add(newNewsDialogScrollPane, BorderLayout.CENTER);
-			newNewsDialog.add(newNewsDialogButtonPanel, BorderLayout.SOUTH);
+			newNewsDialogHeadline.setText("");
+			newNewsDialogMessage.setText("");
 			newNewsDialog.setVisible(true);
 		}
 	});
@@ -255,7 +255,7 @@ public void rysujListeNiusow(JPanel p, HashMap<Integer, Buttons> l, HashMap<Inte
 
 public void serverStart()
 {
-	message("Server", "Hello Staffi!");
+	message("Server", " starting...");
 	users = new HashMap<Integer, ServerConnectors>();
 	news = new HashMap<Integer, News>();
 	newsList = new HashMap<Integer, Buttons>();

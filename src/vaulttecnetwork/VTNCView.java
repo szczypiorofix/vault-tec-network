@@ -222,6 +222,11 @@ public HashMap<Integer, Button> getOptionButtons()
 	return buttons;
 }
 
+public void setOptionButtons(HashMap<Integer, Button> b)
+{
+	buttons = b;
+}
+
 public boolean helpIsVisible()
 {
 	return helpWindow.isVisible();
@@ -336,7 +341,6 @@ public void zrzutLoga(Exception e, Boolean closeProgram)
 
 public void showInfoPane(String head, String msg)
 {
-	//JOptionPane.showMessageDialog(this, msg, "", JOptionPane.INFORMATION_MESSAGE);
 	JDialog d = new JDialog(this, head, true);
 	d.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 	d.setSize(400, 400);
