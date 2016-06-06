@@ -8,7 +8,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -27,10 +26,8 @@ private VTNCModel vtncModel;
 private VTNCView vtncView;
 private int selected;
 private Socket socket;
-private ObjectOutputStream oos;
 private ObjectInputStream ois;
 private Cursor defaultCursor;
-private OptionButtonsMouseListener optionButtonListnener;
 private HashMap<Integer, News> news;
 
 
@@ -40,7 +37,6 @@ public VTNCController(VTNCModel mModel, VTNCView mView)
 	vtncView = mView;
 	vtncView.addButtonListener(new ButtonClickListener());
 	vtncView.addKeyboardListener(new KeyPressedListener());
-	
 	vtncView.addFunctionButtonsMouseListener(new FuncionButtonsMouseListener());
 	selected = vtncView.getSelectedOption();
 	news = new HashMap<Integer, News>();
@@ -102,6 +98,7 @@ class OptionButtonsMouseListener implements MouseListener
 	public void mouseReleased(MouseEvent e) {}
 	@Override
 	public void mouseEntered(MouseEvent e) {
+		System.exit(0);
 		vtncView.messageSound(soundFile1);
 		vtncView.deselectOption(selected);
 		int i;
@@ -138,21 +135,25 @@ public void actionPerformed(ActionEvent a) {
 	{
 		socket = new Socket();
 		try {
+			
 			defaultCursor = vtncView.getCursor();
 			vtncView.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 			socket.connect(new InetSocketAddress("127.0.0.1", 1201), 5000); // 5 sek. timeout
 			
 			ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+			vtncView.getOptionButtons().clear();
 			news = (HashMap<Integer, News>) ois.readObject();
 			vtncView.setCursor(defaultCursor);
 			
+			for (int i = 1; i < vtncView.getOptionButtons().size(); i++) vtncView.deselectButton(vtncView.getOptionButtons().get(i));
 			for (int i = 1; i < news.size()+1; i++)
 			{
 				vtncView.getOptionButtons().put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
 			}
-			optionButtonListnener = new OptionButtonsMouseListener();
-			vtncView.addOptionButtonsMouseListener(optionButtonListnener);
+		
+			for (int i = 1; i < vtncView.getOptionButtons().size(); i++) vtncView.deselectButton(vtncView.getOptionButtons().get(i));
 			
+			vtncView.setSelectedOption(1);
 			vtncView.setMaxOption(vtncView.getOptionButtons().size());
 			vtncView.rysujButtony(vtncView.getOptionButtons());
 		}
