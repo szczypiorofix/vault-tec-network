@@ -222,6 +222,11 @@ public HashMap<Integer, Button> getOptionButtons()
 	return buttons;
 }
 
+public Button getOptionButton(int i)
+{
+	return buttons.get(i);
+}
+
 public void setOptionButtons(HashMap<Integer, Button> b)
 {
 	buttons = b;

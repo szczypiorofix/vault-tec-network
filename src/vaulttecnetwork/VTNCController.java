@@ -29,12 +29,14 @@ private Socket socket;
 private ObjectInputStream ois;
 private Cursor defaultCursor;
 private HashMap<Integer, News> news;
+private HashMap<Integer, Button> mButtons;
 
 
 public VTNCController(VTNCModel mModel, VTNCView mView)
 {
 	vtncModel = mModel;
 	vtncView = mView;
+	mButtons = vtncView.getOptionButtons();
 	vtncView.addButtonListener(new ButtonClickListener());
 	vtncView.addKeyboardListener(new KeyPressedListener());
 	vtncView.addFunctionButtonsMouseListener(new FuncionButtonsMouseListener());
@@ -113,7 +115,7 @@ class OptionButtonsMouseListener implements MouseListener
 }
 
 
-class ButtonClickListener implements ActionListener
+class ButtonClickListener implements ActionListener, MouseListener
 {
 
 @Override
@@ -148,14 +150,18 @@ public void actionPerformed(ActionEvent a) {
 			for (int i = 1; i < vtncView.getOptionButtons().size(); i++) vtncView.deselectButton(vtncView.getOptionButtons().get(i));
 			for (int i = 1; i < news.size()+1; i++)
 			{
-				vtncView.getOptionButtons().put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
+				//vtncView.getOptionButtons().put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
+				mButtons.put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
 			}
-		
-			for (int i = 1; i < vtncView.getOptionButtons().size(); i++) vtncView.deselectButton(vtncView.getOptionButtons().get(i));
+
+			mButtons.get(1).addMouseListener(this);
+			
+			
+			for (int i = 1; i < mButtons.size(); i++) vtncView.deselectButton(mButtons.get(i));
 			
 			vtncView.setSelectedOption(1);
-			vtncView.setMaxOption(vtncView.getOptionButtons().size());
-			vtncView.rysujButtony(vtncView.getOptionButtons());
+			vtncView.setMaxOption(mButtons.size());
+			vtncView.rysujButtony(mButtons);
 		}
 		catch (IOException ioe)
 		{
@@ -178,7 +184,37 @@ public void actionPerformed(ActionEvent a) {
 			}
 		}
 	}
-	}	
+	}
+
+@Override
+public void mouseClicked(MouseEvent e) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void mouseEntered(MouseEvent e) {
+	// TODO Auto-generated method stub
+	System.exit(0);
+}
+
+@Override
+public void mouseExited(MouseEvent e) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void mousePressed(MouseEvent e) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void mouseReleased(MouseEvent e) {
+	// TODO Auto-generated method stub
+	
+}	
 }
 
 
