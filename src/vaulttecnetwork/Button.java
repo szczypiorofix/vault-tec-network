@@ -3,6 +3,9 @@ package vaulttecnetwork;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -45,7 +48,7 @@ public Button(ButtonTypes t, String txt)
 	if (typ == ButtonTypes.BOPTION) {
 		setHorizontalAlignment(SwingConstants.LEFT);
 		setForeground(FONT_GREEN);
-		setFont(VTNCView.falloutFont);
+		setFont(VTNC_GUI.falloutFont);
 		setText(text);
 	}
 }
@@ -68,6 +71,7 @@ public ButtonTypes typButtona()
 {
 	return typ;
 }
+
 
 @Override
 protected void paintComponent(Graphics g)
@@ -92,5 +96,26 @@ protected void paintComponent(Graphics g)
 	default:
 		break;
 	}
+}
+
+
+public void addFunctionButtonsActionListener(ActionListener a)
+{
+	this.addActionListener(a);
+}
+
+public void addOptionButtonsActionListner(ActionListener m)
+{
+	this.addActionListener(m);
+}
+
+public void addFunctionButtonsMouseListner(MouseListener m)
+{
+	this.addMouseListener(m);
+}
+
+public void addOptionButtonsMouseListener(MouseListener m)
+{
+	this.addMouseListener(m);
 }
 }

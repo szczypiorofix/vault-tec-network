@@ -2,17 +2,24 @@ package vaulttecnetwork;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,7 +28,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -35,23 +41,23 @@ import javax.swing.JTextArea;
 import javax.swing.JWindow;
 import javax.swing.border.LineBorder;
 
-public class VTNCView extends JFrame{
 
-	
+public class VTNC_GUI extends JFrame{
+
 private static final long serialVersionUID = 1L;
+private final String INITIAL_TERMINAL_TEXT = "VAULT-TEC NETWORK CLIENT v.1.0\nEMPLOYEE ACCESS TERMINAL\n==========================================";
 private final ImageIcon BACKGROUNDIMAGE = new ImageIcon(getClass().getResource("/res/terminal_background.png"));
+private final URL soundFile1 = getClass().getResource("/res/sound1.wav");
+private final URL soundFile2 = getClass().getResource("/res/sound2.wav");
 private AudioInputStream beepStream;
 private Clip beep;
 private final InputStream FALLOUT_FONT = getClass().getResourceAsStream("/res/FalloutFont.ttf");
-private final String INITIAL_TERMINAL_TEXT_AREA = "";
 public static Font falloutFont = null;
-private VTNCModel vtncModel;
 private JPanel cPanel, textPanel;
 private Button bPower, bHelp, bRefresh;
 private HashMap<Integer, Button> buttons = new HashMap<Integer, Button>();
 private JTextArea terminalTextArea;
 private JWindow helpWindow;
-private String terminalText;
 private final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 private final int szerokosc = (int) screenSize.getWidth();
 private final int wysokosc = (int) screenSize.getHeight();
@@ -61,13 +67,16 @@ private Date currentDate;
 private SimpleDateFormat sdf;
 private FileHandler fileHandler;
 private final static Logger LOGGER = Logger.getLogger(VaultTecNetworkClientMain.class.getName());
-
-
-public VTNCView(VTNCModel mModel)
-{
-	super("Vault-Tec Unified Customer Network Communicator");
-	vtncModel = mModel;
+private int selected;
+private Socket socket;
+private ObjectInputStream ois;
+private Cursor defaultCursor;
+private HashMap<Integer, News> news;
 	
+	
+public VTNC_GUI()
+{
+	super("Vault-Tec Unified Customer Network Communicator");	
 	this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	this.setSize(Toolkit.getDefaultToolkit().getScreenSize().width, Toolkit.getDefaultToolkit().getScreenSize().height);
 	this.setLayout(new BorderLayout());
@@ -99,7 +108,7 @@ public VTNCView(VTNCModel mModel)
 	terminalTextArea.setOpaque(false);
 	terminalTextArea.setEditable(false);
 	terminalTextArea.setFocusable(false);
-	terminalTextArea.setText(vtncModel.getDefText());
+	terminalTextArea.setText(INITIAL_TERMINAL_TEXT);
 
 	textPanel = new JPanel(new BorderLayout());
 	textPanel.setBounds(120, 200, 420, 400);
@@ -107,19 +116,14 @@ public VTNCView(VTNCModel mModel)
 	textPanel.setFocusable(false);
 	textPanel.add(terminalTextArea);
 	
-	//buttons.put(1, new Button(ButtonTypes.BOPTION, "> OPTION 1"));
-	//buttons.put(2, new Button(ButtonTypes.BOPTION, "> OPTION 2"));
-	
-	rysujButtony(buttons);
-		
-	setMaxOption(buttons.size());
-	setSelectedOption(1);
-	if (buttons.size() > 0) selectOption(getSelectedOption()); 
-	
 	bPower = new Button(ButtonTypes.BPOWER, "");
 	bPower.setFont(falloutFont);
+	bPower.addFunctionButtonsMouseListner(new FunctionButtonsMouseListener());
+	
 	bHelp = new Button(ButtonTypes.BHELP, "");
 	bHelp.setFont(falloutFont);
+	bHelp.addFunctionButtonsMouseListner(new FunctionButtonsMouseListener());
+	
 	bRefresh = new Button(ButtonTypes.BREFRESH, "");
 	
 	defineHelpWindow();
@@ -132,6 +136,16 @@ public VTNCView(VTNCModel mModel)
 	cPanel.add(bRefresh);
 	cPanel.add(textPanel);
 	this.add(cPanel);
+	news = new HashMap<Integer, News>();
+	
+	
+	
+	
+	buttons.put(1, new Button(ButtonTypes.BOPTION, "AAAAAAAAA"));
+	
+	
+	
+	rysujButtony(buttons);
 }
 
 public void defineHelpWindow()
@@ -168,8 +182,8 @@ public void rysujButtony(HashMap<Integer, Button> b)
 {
 	for (int i = 1; i < buttons.size()+1; i++)
 	{
-		buttons.get(i).setBounds(110, 250 + (i*50), 300, 40);
-		cPanel.add(buttons.get(i));
+		b.get(i).setBounds(110, 250 + (i*50), 300, 40);
+		cPanel.add(b.get(i));
 	}
 	cPanel.revalidate();
 	cPanel.repaint();
@@ -185,142 +199,6 @@ public void messageSound(URL s)
 	    } catch(Exception ex) {
 	    	zrzutLoga(ex, true);
 	    }
-}
-
-public void selectButton(Button b)
-{
-	b.setBorder(new LineBorder(Color.RED, 2, true));
-}
-
-public void deselectButton(Button b)
-{
-	b.setBorder(null);
-}
-
-public ButtonTypes buttonType(Button b)
-{
-	return b.typButtona();
-}
-
-public Button getPowerButton()
-{
-	return bPower;
-}
-
-public Button getHelpButton()
-{
-	return bHelp;
-}
-
-public Button getRefreshButton()
-{
-	return bRefresh;
-}
-
-public HashMap<Integer, Button> getOptionButtons()
-{
-	return buttons;
-}
-
-public Button getOptionButton(int i)
-{
-	return buttons.get(i);
-}
-
-public void setOptionButtons(HashMap<Integer, Button> b)
-{
-	buttons = b;
-}
-
-public boolean helpIsVisible()
-{
-	return helpWindow.isVisible();
-}
-
-public void helpVisible(boolean b)
-{
-	helpWindow.setVisible(b);
-}
-
-public void addButtonListener(ActionListener a)
-{
-	bPower.addActionListener(a);
-	bHelp.addActionListener(a);
-	bRefresh.addActionListener(a);
-}
-
-public void addOptionButtonsMouseListener(MouseListener m)
-{
-	for (int i = 1; i < buttons.size()+1; i++) buttons.get(i).addMouseListener(m);
-}
-
-public void addFunctionButtonsMouseListener(MouseListener m)
-{
-	bPower.addMouseListener(m);
-	bHelp.addMouseListener(m);
-	bRefresh.addMouseListener(m);
-}
-
-public void addKeyboardListener(KeyListener k)
-{
-	this.addKeyListener(k);
-}
-
-public void resetTerminalTextArea()
-{
-	terminalTextArea.setText(INITIAL_TERMINAL_TEXT_AREA);
-}
-
-public void setTerminalTextArea(String s)
-{
-	terminalTextArea.setText(s);
-}
-
-public void setSelectedOption(int s)
-{
-	selectedOption = s;
-}
-
-public int getSelectedOption()
-{
-	return selectedOption;
-}
-
-public void selectOption(int i)
-{
-	buttons.get(i).selectOption();
-}
-
-public void deselectOption(int i)
-{
-	buttons.get(i).deselectOption();
-}
-
-public int getMaxOption()
-{
-	return max_option;
-}
-
-public void setMaxOption(int m)
-{
-	max_option = m;
-}
-
-public JButton whichButton (ButtonTypes b)
-{
-	switch (b)
-	{
-	case BPOWER: {
-		return bPower;
-	}
-	case BHELP: {
-		return bHelp;
-	}
-	case BREFRESH: {
-		return bRefresh;
-	}
-	default: return null;
-	}
 }
 
 public void zrzutLoga(Exception e, Boolean closeProgram)
@@ -358,5 +236,46 @@ public void showError(String errMsg)
 {
 	JOptionPane.showMessageDialog(this, errMsg, "ERROR!", JOptionPane.ERROR_MESSAGE);
 }
+
+
+public class FunctionButtonsMouseListener implements MouseListener
+{
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		if (e.getComponent() == bPower) System.exit(0);
+		else if (e.getComponent() == bHelp) 
+			{
+				showHelp();
+			}
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+}
+
 
 }
