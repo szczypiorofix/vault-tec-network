@@ -68,6 +68,7 @@ private SimpleDateFormat sdf;
 private FileHandler fileHandler;
 private final static Logger LOGGER = Logger.getLogger(VaultTecNetworkClientMain.class.getName());
 private int selected;
+private boolean help = false;
 private Socket socket;
 private ObjectInputStream ois;
 private Cursor defaultCursor;
@@ -140,7 +141,6 @@ public VTNC_GUI()
 	
 	
 	
-	
 	buttons.put(1, new Button(ButtonTypes.BOPTION, "AAAAAAAAA"));
 	
 	
@@ -160,9 +160,9 @@ public void defineHelpWindow()
 	helpWindow.add(helpWindowText);
 }
 
-public void showHelp()
+public void showHelp(boolean b)
 {
-	helpWindow.setVisible(true);
+	helpWindow.setVisible(b);
 	this.addKeyListener(new KeyListener()
 	{
 		@Override
@@ -246,7 +246,8 @@ public class FunctionButtonsMouseListener implements MouseListener
 		if (e.getComponent() == bPower) System.exit(0);
 		else if (e.getComponent() == bHelp) 
 			{
-				showHelp();
+				help = !help;
+				showHelp(help);
 			}
 	}
 
