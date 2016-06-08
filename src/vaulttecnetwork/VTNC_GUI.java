@@ -8,17 +8,13 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -32,14 +28,12 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JWindow;
-import javax.swing.border.LineBorder;
 
 
 public class VTNC_GUI extends JFrame{
@@ -69,6 +63,7 @@ private FileHandler fileHandler;
 private final static Logger LOGGER = Logger.getLogger(VaultTecNetworkClientMain.class.getName());
 private int selected;
 private boolean help = false;
+private boolean showHelp = false;
 private Socket socket;
 private ObjectInputStream ois;
 private Cursor defaultCursor;
@@ -128,7 +123,6 @@ public VTNC_GUI()
 	bRefresh = new Button(ButtonTypes.BREFRESH, "");
 	
 	defineHelpWindow();
-	
 	bPower.setBounds(25, wysokosc - 90, 60, 60);
 	cPanel.add(bPower);
 	bHelp.setBounds(szerokosc - 95, wysokosc - 100, 60, 60);
@@ -137,14 +131,8 @@ public VTNC_GUI()
 	cPanel.add(bRefresh);
 	cPanel.add(textPanel);
 	this.add(cPanel);
-	news = new HashMap<Integer, News>();
-	
-	
-	
+	news = new HashMap<Integer, News>();	
 	buttons.put(1, new Button(ButtonTypes.BOPTION, "AAAAAAAAA"));
-	
-	
-	
 	rysujButtony(buttons);
 }
 
@@ -277,6 +265,4 @@ public class FunctionButtonsMouseListener implements MouseListener
 	}
 	
 }
-
-
 }
