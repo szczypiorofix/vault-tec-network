@@ -8,10 +8,6 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedInputStream;
@@ -68,6 +64,7 @@ private SimpleDateFormat sdf;
 private FileHandler fileHandler;
 private final static Logger LOGGER = Logger.getLogger(VaultTecNetworkClientMain.class.getName());
 private int selected;
+private boolean showHelp = false;
 private Socket socket;
 private ObjectInputStream ois;
 private Cursor defaultCursor;
@@ -127,7 +124,6 @@ public VTNC_GUI()
 	bRefresh = new Button(ButtonTypes.BREFRESH, "");
 	
 	defineHelpWindow();
-	
 	bPower.setBounds(25, wysokosc - 90, 60, 60);
 	cPanel.add(bPower);
 	bHelp.setBounds(szerokosc - 95, wysokosc - 100, 60, 60);
@@ -158,24 +154,6 @@ public void defineHelpWindow()
 	helpWindowText.setEditable(false);
 	helpWindowText.setFocusable(false);
 	helpWindow.add(helpWindowText);
-}
-
-public void showHelp()
-{
-	helpWindow.setVisible(true);
-	this.addKeyListener(new KeyListener()
-	{
-		@Override
-		public void keyTyped(KeyEvent e) {}
-
-		@Override
-		public void keyPressed(KeyEvent e) {
-			if (e.getKeyCode() == KeyEvent.VK_ESCAPE) helpWindow.setVisible(false);
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {}	
-	});
 }
 
 public void rysujButtony(HashMap<Integer, Button> b)
@@ -246,7 +224,8 @@ public class FunctionButtonsMouseListener implements MouseListener
 		if (e.getComponent() == bPower) System.exit(0);
 		else if (e.getComponent() == bHelp) 
 			{
-				showHelp();
+				showHelp = !showHelp;	
+				helpWindow.setVisible(showHelp);
 			}
 	}
 
