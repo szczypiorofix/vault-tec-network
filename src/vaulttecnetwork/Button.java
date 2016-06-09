@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -43,7 +42,6 @@ public Button(ButtonTypes t, String txt)
 	}
 	setOpaque(false);
 	setContentAreaFilled(false);
-	setFocusable(false);
 	setBorder(new EmptyBorder(5,5,5,5));	
 	if (typ == ButtonTypes.BOPTION) {
 		setHorizontalAlignment(SwingConstants.LEFT);
@@ -51,6 +49,7 @@ public Button(ButtonTypes t, String txt)
 		setFont(VTNC_GUI.falloutFont);
 		setText(text);
 	}
+	setFocusable(false);
 }
 
 public void selectOption()
@@ -65,11 +64,6 @@ public void deselectOption()
 	setOpaque(false);
 	setBackground(null);
 	setForeground(FONT_GREEN);
-}
-
-public ButtonTypes typButtona()
-{
-	return typ;
 }
 
 

@@ -8,16 +8,21 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.FileHandler;
@@ -28,21 +33,24 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JWindow;
+import javax.swing.border.LineBorder;
 
 
-public class VTNC_GUI extends JFrame{
+public class VTNC_GUI extends JFrame {
 
 private static final long serialVersionUID = 1L;
 private final String INITIAL_TERMINAL_TEXT = "VAULT-TEC NETWORK CLIENT v.1.0\nEMPLOYEE ACCESS TERMINAL\n==========================================";
 private final ImageIcon BACKGROUNDIMAGE = new ImageIcon(getClass().getResource("/res/terminal_background.png"));
 private final URL soundFile1 = getClass().getResource("/res/sound1.wav");
 private final URL soundFile2 = getClass().getResource("/res/sound2.wav");
+private final LineBorder RED_BORDER = new LineBorder(Color.RED, 2, true);
 private AudioInputStream beepStream;
 private Clip beep;
 private final InputStream FALLOUT_FONT = getClass().getResourceAsStream("/res/FalloutFont.ttf");
@@ -61,14 +69,14 @@ private Date currentDate;
 private SimpleDateFormat sdf;
 private FileHandler fileHandler;
 private final static Logger LOGGER = Logger.getLogger(VaultTecNetworkClientMain.class.getName());
-private int selected;
-private boolean help = false;
+private int selected = 1;
 private boolean showHelp = false;
 private Socket socket;
 private ObjectInputStream ois;
 private Cursor defaultCursor;
 private HashMap<Integer, News> news;
-	
+
+
 	
 public VTNC_GUI()
 {
@@ -79,6 +87,8 @@ public VTNC_GUI()
 	this.setUndecorated(true);
 	this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	this.setLocationRelativeTo(null);
+	this.addKeyListener(new KeyboardListener());
+	
 
 	try {
 		falloutFont = Font.createFont(Font.TRUETYPE_FONT, FALLOUT_FONT).deriveFont(26f);
@@ -107,7 +117,7 @@ public VTNC_GUI()
 	terminalTextArea.setText(INITIAL_TERMINAL_TEXT);
 
 	textPanel = new JPanel(new BorderLayout());
-	textPanel.setBounds(120, 200, 420, 400);
+	textPanel.setBounds(120, 200, 420, 80);
 	textPanel.setOpaque(false);
 	textPanel.setFocusable(false);
 	textPanel.add(terminalTextArea);
@@ -121,19 +131,31 @@ public VTNC_GUI()
 	bHelp.addFunctionButtonsMouseListner(new FunctionButtonsMouseListener());
 	
 	bRefresh = new Button(ButtonTypes.BREFRESH, "");
+	bRefresh.addFunctionButtonsMouseListner(new FunctionButtonsMouseListener());
 	
 	defineHelpWindow();
 	bPower.setBounds(25, wysokosc - 90, 60, 60);
-	cPanel.add(bPower);
+	
 	bHelp.setBounds(szerokosc - 95, wysokosc - 100, 60, 60);
-	cPanel.add(bHelp);
+	
 	bRefresh.setBounds(szerokosc - 95, 10, 60, 60);
+	cPanel.add(bPower);
+	cPanel.add(bHelp);
 	cPanel.add(bRefresh);
 	cPanel.add(textPanel);
-	this.add(cPanel);
 	news = new HashMap<Integer, News>();	
-	buttons.put(1, new Button(ButtonTypes.BOPTION, "AAAAAAAAA"));
+
+	//buttons.put(1, new Button(ButtonTypes.BOPTION, "AAAAAAA"));
+	////buttons.put(2, new Button(ButtonTypes.BOPTION, "BBBBBBB"));
+	//buttons.put(3, new Button(ButtonTypes.BOPTION, "CCCCCCC"));
+	//buttons.put(4, new Button(ButtonTypes.BOPTION, "DDDDDDD"));
+	//buttons.put(5, new Button(ButtonTypes.BOPTION, "EEEEE"));
+	//buttons.put(6, new Button(ButtonTypes.BOPTION, "FFF"));
+	
 	rysujButtony(buttons);
+	
+	//buttons.get(selected).selectOption();
+	this.add(cPanel);
 }
 
 public void defineHelpWindow()
@@ -144,37 +166,17 @@ public void defineHelpWindow()
 	helpWindow.setForeground(Color.WHITE);
 	JTextArea helpWindowText = new JTextArea("  POMOC DLA PROGRAMU...\n\n  Strza³ki (góra/dó³) - poruszanie po menu\n  Enter - wybór opcji\n  Przycisk POWER - zamkniecie\n  Przycisk HELP (F1) - Pomoc");
 	helpWindowText.setEditable(false);
-	helpWindowText.setFocusable(false);
 	helpWindow.add(helpWindowText);
-}
-
-public void showHelp(boolean b)
-{
-	helpWindow.setVisible(b);
-	this.addKeyListener(new KeyListener()
-	{
-		@Override
-		public void keyTyped(KeyEvent e) {}
-
-		@Override
-		public void keyPressed(KeyEvent e) {
-			if (e.getKeyCode() == KeyEvent.VK_ESCAPE) helpWindow.setVisible(false);
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {}	
-	});
 }
 
 public void rysujButtony(HashMap<Integer, Button> b)
 {
 	for (int i = 1; i < buttons.size()+1; i++)
 	{
-		b.get(i).setBounds(110, 250 + (i*50), 300, 40);
+		b.get(i).setBounds(115, 290 + (i*50), 300, 40);
+		b.get(i).addOptionButtonsMouseListener(new OptionButtonsMouseListener());
 		cPanel.add(b.get(i));
 	}
-	cPanel.revalidate();
-	cPanel.repaint();
 }
 
 public void messageSound(URL s)
@@ -226,6 +228,79 @@ public void showError(String errMsg)
 }
 
 
+
+
+public class KeyboardListener implements KeyListener
+{
+	@Override
+	public void keyTyped(KeyEvent e) {}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) System.exit(0);
+		else if (e.getKeyCode() == KeyEvent.VK_F1) {
+			showHelp = !showHelp;
+			helpWindow.setVisible(showHelp);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_UP) {
+			if ((selected > 1))
+			{
+				buttons.get(selected).deselectOption();
+				selected--;
+				buttons.get(selected).selectOption();
+			}
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_DOWN)
+		{
+			if (selected < buttons.size())
+			{
+				buttons.get(selected).deselectOption();
+				selected++;
+				buttons.get(selected).selectOption();
+			}
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_ENTER)
+		{
+			showInfoPane(news.get(selected).getHeadline(), news.get(selected).getNewstText());
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {}
+}
+
+
+public class OptionButtonsMouseListener implements MouseListener
+{
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		showInfoPane(news.get(selected).getHeadline(), news.get(selected).getNewstText());
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		buttons.get(selected).deselectOption();
+		int i;
+		for (i = 1; i < buttons.size()+1; i++)
+		{
+			if (e.getComponent() == buttons.get(i))
+				break;
+		}
+		selected = i;
+		buttons.get(selected).selectOption();
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {}
+}
+
+
 public class FunctionButtonsMouseListener implements MouseListener
 {
 
@@ -234,34 +309,89 @@ public class FunctionButtonsMouseListener implements MouseListener
 		if (e.getComponent() == bPower) System.exit(0);
 		else if (e.getComponent() == bHelp) 
 			{
-				help = !help;
-				showHelp(help);
+				showHelp = !showHelp;
+				helpWindow.setVisible(showHelp);
 			}
-	}
+		else if (e.getComponent() == bRefresh)
+		{
+
+	 		socket = new Socket();
+	 		try {
+	 			defaultCursor = getCursor();
+	 			setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	 			socket.connect(new InetSocketAddress("127.0.0.1", 1201), 5000); // 5 sek. timeout
+	 			ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+
+	 			for (int i = 1; i < buttons.size(); i++) {
+	 				buttons.get(i).deselectOption();
+	 			}
+	 			
+	 			news = (HashMap<Integer, News>) ois.readObject();
+
+	 			// TODO Poprawiæ kolejne odœwie¿ania niusów bo wywala b³¹d!
+	 			
+	 			
+	 			setCursor(defaultCursor);
+	 				 			
+	 			for (int i = 1; i < news.size()+1; i++)
+	 			{
+					buttons.put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
+	 			}
+	 			selected = 1;
+				rysujButtony(buttons);
+				cPanel.repaint();
+	 		}
+
+	 		catch (IOException ioe)
+	 		{
+	 			ioe.printStackTrace();
+	 			zrzutLoga(ioe, true);
+ 			}
+	 		catch (ClassNotFoundException cnfe)
+	 		{
+	 			cnfe.printStackTrace();
+	 			zrzutLoga(cnfe, true);
+	 		}
+ 		}
+ 	}
+
 
 	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mousePressed(MouseEvent e) {}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseReleased(MouseEvent e) {}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-		
+		if (e.getComponent() == bPower)
+		{
+			bPower.setBorder(RED_BORDER);
+		}
+		else if (e.getComponent() == bHelp)
+		{
+			bHelp.setBorder(RED_BORDER);
+		}
+		else if (e.getComponent() == bRefresh)
+		{
+			bRefresh.setBorder(RED_BORDER);
+		}
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+		if (e.getComponent() == bPower)
+		{
+			bPower.setBorder(null);
+		}
+		else if (e.getComponent() == bHelp)
+		{
+			bHelp.setBorder(null);
+		}
+		else if (e.getComponent() == bRefresh)
+		{
+			bRefresh.setBorder(null);
+		}
 	}
 	
 }
