@@ -2,13 +2,11 @@ package vaulttecnetwork;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -25,7 +23,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.FileHandler;
@@ -37,7 +34,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -54,7 +50,7 @@ private final String INITIAL_TERMINAL_TEXT = "VAULT-TEC NETWORK CLIENT v.1.0\nEM
 private final ImageIcon BACKGROUNDIMAGE = new ImageIcon(getClass().getResource("/res/terminal_background.png"));
 private final ImageIcon CURSOR = new ImageIcon(getClass().getResource("/res/cursor1.png"));
 private final URL soundFile1 = getClass().getResource("/res/sound1.wav");
-private final URL soundFile2 = getClass().getResource("/res/sound2.wav");
+//private final URL soundFile2 = getClass().getResource("/res/sound2.wav");
 private final LineBorder RED_BORDER = new LineBorder(Color.RED, 2, true);
 private AudioInputStream beepStream;
 private Clip beep;
@@ -68,8 +64,6 @@ private JWindow helpWindow;
 private final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 private final int szerokosc = (int) screenSize.getWidth();
 private final int wysokosc = (int) screenSize.getHeight();
-private int selectedOption = 0;
-private int max_option;
 private Date currentDate;
 private SimpleDateFormat sdf;
 private FileHandler fileHandler;
@@ -353,6 +347,8 @@ public OptionButtonsMouseListener(HashMap<Integer, Button> b)
 public class FunctionButtonsMouseListener implements MouseListener
 {
 
+	@SuppressWarnings("unchecked")
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (e.getComponent() == bPower) System.exit(0);
