@@ -2,11 +2,14 @@ package vaulttecnetwork;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -39,6 +42,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JWindow;
 import javax.swing.border.LineBorder;
 
@@ -48,6 +52,7 @@ public class VTNC_GUI extends JFrame {
 private static final long serialVersionUID = 1L;
 private final String INITIAL_TERMINAL_TEXT = "VAULT-TEC NETWORK CLIENT v.1.0\nEMPLOYEE ACCESS TERMINAL\n==========================================";
 private final ImageIcon BACKGROUNDIMAGE = new ImageIcon(getClass().getResource("/res/terminal_background.png"));
+private final ImageIcon CURSOR = new ImageIcon(getClass().getResource("/res/cursor1.png"));
 private final URL soundFile1 = getClass().getResource("/res/sound1.wav");
 private final URL soundFile2 = getClass().getResource("/res/sound2.wav");
 private final LineBorder RED_BORDER = new LineBorder(Color.RED, 2, true);
@@ -77,6 +82,7 @@ private Cursor defaultCursor;
 private HashMap<Integer, News> news;
 
 
+
 	
 public VTNC_GUI()
 {
@@ -87,8 +93,9 @@ public VTNC_GUI()
 	this.setUndecorated(true);
 	this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	this.setLocationRelativeTo(null);
-	this.addKeyListener(new KeyboardListener());
 	
+	defaultCursor = Toolkit.getDefaultToolkit().createCustomCursor(CURSOR.getImage(), new Point(0, 0), "cursor");
+	this.setCursor(defaultCursor);
 
 	try {
 		falloutFont = Font.createFont(Font.TRUETYPE_FONT, FALLOUT_FONT).deriveFont(26f);
@@ -143,18 +150,8 @@ public VTNC_GUI()
 	cPanel.add(bHelp);
 	cPanel.add(bRefresh);
 	cPanel.add(textPanel);
-	news = new HashMap<Integer, News>();	
-
-	//buttons.put(1, new Button(ButtonTypes.BOPTION, "AAAAAAA"));
-	////buttons.put(2, new Button(ButtonTypes.BOPTION, "BBBBBBB"));
-	//buttons.put(3, new Button(ButtonTypes.BOPTION, "CCCCCCC"));
-	//buttons.put(4, new Button(ButtonTypes.BOPTION, "DDDDDDD"));
-	//buttons.put(5, new Button(ButtonTypes.BOPTION, "EEEEE"));
-	//buttons.put(6, new Button(ButtonTypes.BOPTION, "FFF"));
-	
-	rysujButtony(buttons);
-	
-	//buttons.get(selected).selectOption();
+	news = new HashMap<Integer, News>();
+	this.addKeyListener(new KeyboardListener());
 	this.add(cPanel);
 }
 
@@ -164,6 +161,7 @@ public void defineHelpWindow()
 	helpWindow.setBounds(szerokosc - 350, wysokosc - 300, 300, 150);
 	helpWindow.setBackground(Color.BLACK);
 	helpWindow.setForeground(Color.WHITE);
+	helpWindow.setCursor(defaultCursor);
 	JTextArea helpWindowText = new JTextArea("  POMOC DLA PROGRAMU...\n\n  Strza³ki (góra/dó³) - poruszanie po menu\n  Enter - wybór opcji\n  Przycisk POWER - zamkniecie\n  Przycisk HELP (F1) - Pomoc");
 	helpWindowText.setEditable(false);
 	helpWindow.add(helpWindowText);
@@ -171,11 +169,12 @@ public void defineHelpWindow()
 
 public void rysujButtony(HashMap<Integer, Button> b)
 {
+	
 	for (int i = 1; i < buttons.size()+1; i++)
 	{
 		b.get(i).setBounds(115, 290 + (i*50), 300, 40);
-		b.get(i).addOptionButtonsMouseListener(new OptionButtonsMouseListener());
 		cPanel.add(b.get(i));
+		b.get(i).addOptionButtonsMouseListener(new OptionButtonsMouseListener(buttons));
 	}
 }
 
@@ -196,7 +195,7 @@ public void zrzutLoga(Exception e, Boolean closeProgram)
 	currentDate = new Date();
 	sdf = new SimpleDateFormat("YYYY.MM.dd-HH.mm.ss");
 	try {
-		fileHandler = new FileHandler("client" +sdf.format(currentDate) +".log", false);
+		fileHandler = new FileHandler("client_crash_" +sdf.format(currentDate) +".log", false);
 	} catch (SecurityException se) {
 		se.printStackTrace();
 		System.exit(-1);
@@ -214,11 +213,30 @@ public void zrzutLoga(Exception e, Boolean closeProgram)
 
 public void showInfoPane(String head, String msg)
 {
-	JDialog d = new JDialog(this, head, true);
-	d.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+	JWindow d = new JWindow();
+	d.setLayout(null);
 	d.setSize(400, 400);
+	d.setCursor(defaultCursor);
 	d.setLocationRelativeTo(this);
-	d.add(new JTextArea(msg));
+	JTextField dHead = new JTextField(head);
+	dHead.setEditable(false);
+	dHead.setBounds(5,5, 380, 20);
+	JTextArea dMsg = new JTextArea(msg);
+	dMsg.setBounds(5,25,380, 330);
+	dMsg.setEditable(false);
+	JButton b1 = new JButton("Zamknij");
+	b1.setBounds(10, 360, 100, 30);
+	b1.addActionListener(new ActionListener()
+	{
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			d.dispose();
+		}
+	});
+	d.add(dHead);
+	d.add(dMsg);
+	d.add(b1);
 	d.setVisible(true);
 }
 
@@ -229,38 +247,60 @@ public void showError(String errMsg)
 
 
 
-
 public class KeyboardListener implements KeyListener
 {
+	
 	@Override
 	public void keyTyped(KeyEvent e) {}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) System.exit(0);
-		else if (e.getKeyCode() == KeyEvent.VK_F1) {
+		
+		if (e.getKeyCode() == KeyEvent.VK_F1) {
 			showHelp = !showHelp;
 			helpWindow.setVisible(showHelp);
 		}
+		else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) System.exit(0);
 		else if (e.getKeyCode() == KeyEvent.VK_UP) {
-			if ((selected > 1))
+			if ((selected >= 1))
 			{
-				buttons.get(selected).deselectOption();
-				selected--;
-				buttons.get(selected).selectOption();
+				if (selected == 1)
+				{
+					buttons.get(selected).deselectOption();
+					selected=buttons.size();
+					buttons.get(selected).selectOption();
+					messageSound(soundFile1);
+				}
+				else {
+					buttons.get(selected).deselectOption();
+					selected--;
+					buttons.get(selected).selectOption();
+					messageSound(soundFile1);
+				}
 			}
 		}
 		else if (e.getKeyCode() == KeyEvent.VK_DOWN)
 		{
-			if (selected < buttons.size())
+			if (selected <= buttons.size())
 			{
-				buttons.get(selected).deselectOption();
-				selected++;
-				buttons.get(selected).selectOption();
+				if (selected == buttons.size())
+				{
+					buttons.get(selected).deselectOption();
+					selected=1;
+					buttons.get(selected).selectOption();
+					messageSound(soundFile1);
+				}
+				else {
+					buttons.get(selected).deselectOption();
+					selected++;
+					buttons.get(selected).selectOption();
+					messageSound(soundFile1);
+				}
 			}
 		}
 		else if (e.getKeyCode() == KeyEvent.VK_ENTER)
 		{
+			messageSound(soundFile1);
 			showInfoPane(news.get(selected).getHeadline(), news.get(selected).getNewstText());
 		}
 	}
@@ -270,8 +310,16 @@ public class KeyboardListener implements KeyListener
 }
 
 
+
 public class OptionButtonsMouseListener implements MouseListener
 {
+private HashMap<Integer, Button> btns;
+
+public OptionButtonsMouseListener(HashMap<Integer, Button> b)
+{
+	btns = b;
+}
+
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		showInfoPane(news.get(selected).getHeadline(), news.get(selected).getNewstText());
@@ -285,15 +333,16 @@ public class OptionButtonsMouseListener implements MouseListener
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		buttons.get(selected).deselectOption();
+		for (int i = 1; i < buttons.size()+1; i++) btns.get(i).deselectOption();
 		int i;
-		for (i = 1; i < buttons.size()+1; i++)
+		for (i = 1; i < btns.size()+1; i++)
 		{
-			if (e.getComponent() == buttons.get(i))
+			if (e.getComponent() == btns.get(i))
 				break;
 		}
 		selected = i;
-		buttons.get(selected).selectOption();
+		btns.get(selected).selectOption();
+		messageSound(soundFile1);
 	}
 
 	@Override
@@ -327,17 +376,18 @@ public class FunctionButtonsMouseListener implements MouseListener
 	 			}
 	 			
 	 			news = (HashMap<Integer, News>) ois.readObject();
-
-	 			// TODO Poprawiæ kolejne odœwie¿ania niusów bo wywala b³¹d!
 	 			
-	 			
+	 			buttons = new HashMap<Integer, Button>();
 	 			setCursor(defaultCursor);
 	 				 			
 	 			for (int i = 1; i < news.size()+1; i++)
 	 			{
 					buttons.put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
 	 			}
-	 			selected = 1;
+
+	 			
+	 			//selected = 1;
+	 			//buttons.get(selected).selectOption();
 				rysujButtony(buttons);
 				cPanel.repaint();
 	 		}
@@ -367,14 +417,17 @@ public class FunctionButtonsMouseListener implements MouseListener
 		if (e.getComponent() == bPower)
 		{
 			bPower.setBorder(RED_BORDER);
+			messageSound(soundFile1);
 		}
 		else if (e.getComponent() == bHelp)
 		{
 			bHelp.setBorder(RED_BORDER);
+			messageSound(soundFile1);
 		}
 		else if (e.getComponent() == bRefresh)
 		{
 			bRefresh.setBorder(RED_BORDER);
+			messageSound(soundFile1);
 		}
 	}
 

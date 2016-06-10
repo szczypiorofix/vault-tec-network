@@ -93,16 +93,6 @@ protected void paintComponent(Graphics g)
 }
 
 
-public void addFunctionButtonsActionListener(ActionListener a)
-{
-	this.addActionListener(a);
-}
-
-public void addOptionButtonsActionListner(ActionListener m)
-{
-	this.addActionListener(m);
-}
-
 public void addFunctionButtonsMouseListner(MouseListener m)
 {
 	this.addMouseListener(m);
