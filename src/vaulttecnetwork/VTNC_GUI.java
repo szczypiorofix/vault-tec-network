@@ -7,7 +7,10 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,7 +18,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.AffineTransform;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -29,18 +34,30 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JWindow;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.basic.BasicScrollBarUI;
+import javax.swing.plaf.metal.MetalScrollBarUI;
 
 
 public class VTNC_GUI extends JFrame {
@@ -49,6 +66,9 @@ private static final long serialVersionUID = 1L;
 private final String INITIAL_TERMINAL_TEXT = "VAULT-TEC NETWORK CLIENT v.1.0\nEMPLOYEE ACCESS TERMINAL\n==========================================";
 private final ImageIcon BACKGROUNDIMAGE = new ImageIcon(getClass().getResource("/res/terminal_background.png"));
 private final ImageIcon CURSOR = new ImageIcon(getClass().getResource("/res/cursor1.png"));
+private final Color FONT_GREEN = new Color(041,225,140);
+private final Color FONT_SELECT_GREEN = new Color(40, 180, 060);
+private final Color FONT_DARK_GREEN = new Color(5, 50, 5);
 private final URL soundFile1 = getClass().getResource("/res/sound1.wav");
 //private final URL soundFile2 = getClass().getResource("/res/sound2.wav");
 private final LineBorder RED_BORDER = new LineBorder(Color.RED, 2, true);
@@ -56,7 +76,8 @@ private AudioInputStream beepStream;
 private Clip beep;
 private final InputStream FALLOUT_FONT = getClass().getResourceAsStream("/res/FalloutFont.ttf");
 public static Font falloutFont = null;
-private JPanel cPanel, textPanel;
+private JPanel cPanel, textPanel, bPanel;
+private JScrollPane bScroll;
 private Button bPower, bHelp, bRefresh;
 private HashMap<Integer, Button> buttons = new HashMap<Integer, Button>();
 private JTextArea terminalTextArea;
@@ -69,7 +90,7 @@ private SimpleDateFormat sdf;
 private FileHandler fileHandler;
 private final static Logger LOGGER = Logger.getLogger(VaultTecNetworkClientMain.class.getName());
 private int selected = 1;
-private boolean showHelp = false;
+private boolean showHelp = false, connected = false;
 private Socket socket;
 private ObjectInputStream ois;
 private Cursor defaultCursor;
@@ -81,6 +102,7 @@ private HashMap<Integer, News> news;
 public VTNC_GUI()
 {
 	super("Vault-Tec Unified Customer Network Communicator");	
+	
 	this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	this.setSize(Toolkit.getDefaultToolkit().getScreenSize().width, Toolkit.getDefaultToolkit().getScreenSize().height);
 	this.setLayout(new BorderLayout());
@@ -108,8 +130,8 @@ public VTNC_GUI()
 			super.paintComponent(g);
 			g.drawImage(BACKGROUNDIMAGE.getImage(), 0, 0, getWidth(), getHeight(), this);
 		}};
-		
-	terminalTextArea = new JTextArea();
+
+		terminalTextArea = new JTextArea();
 	terminalTextArea.setFont(falloutFont);
 	terminalTextArea.setForeground(new Color(041,225,140));
 	terminalTextArea.setOpaque(false);
@@ -125,14 +147,14 @@ public VTNC_GUI()
 	
 	bPower = new Button(ButtonTypes.BPOWER, "");
 	bPower.setFont(falloutFont);
-	bPower.addFunctionButtonsMouseListner(new FunctionButtonsMouseListener());
+	bPower.addMouseListener(new FunctionButtonsMouseListener());
 	
 	bHelp = new Button(ButtonTypes.BHELP, "");
 	bHelp.setFont(falloutFont);
-	bHelp.addFunctionButtonsMouseListner(new FunctionButtonsMouseListener());
+	bHelp.addMouseListener(new FunctionButtonsMouseListener());
 	
 	bRefresh = new Button(ButtonTypes.BREFRESH, "");
-	bRefresh.addFunctionButtonsMouseListner(new FunctionButtonsMouseListener());
+	bRefresh.addMouseListener(new FunctionButtonsMouseListener());
 	
 	defineHelpWindow();
 	bPower.setBounds(25, wysokosc - 90, 60, 60);
@@ -140,13 +162,27 @@ public VTNC_GUI()
 	bHelp.setBounds(szerokosc - 95, wysokosc - 100, 60, 60);
 	
 	bRefresh.setBounds(szerokosc - 95, 10, 60, 60);
+	
+	bPanel = new JPanel(null);
+	bPanel.setOpaque(false);
+	bPanel.setBounds(0, 0, 500, 200);
+	bPanel.setBorder(new LineBorder(Color.RED, 2, true));
+	
+	bScroll = new JScrollPane(bPanel);
+	bScroll.setBounds(120, 300, 500, 200);
+	
+	bScroll.setOpaque(false);
+	
+	
 	cPanel.add(bPower);
 	cPanel.add(bHelp);
 	cPanel.add(bRefresh);
 	cPanel.add(textPanel);
 	news = new HashMap<Integer, News>();
 	this.addKeyListener(new KeyboardListener());
+	this.add(bScroll);
 	this.add(cPanel);
+	
 }
 
 public void defineHelpWindow()
@@ -163,12 +199,10 @@ public void defineHelpWindow()
 
 public void rysujButtony(HashMap<Integer, Button> b)
 {
-	
 	for (int i = 1; i < buttons.size()+1; i++)
 	{
-		b.get(i).setBounds(115, 290 + (i*50), 300, 40);
-		cPanel.add(b.get(i));
-		b.get(i).addOptionButtonsMouseListener(new OptionButtonsMouseListener(buttons));
+		b.get(i).setBounds(10, i*50, 300, 40);
+		bPanel.add(b.get(i));
 	}
 }
 
@@ -239,11 +273,26 @@ public void showError(String errMsg)
 	JOptionPane.showMessageDialog(this, errMsg, "ERROR!", JOptionPane.ERROR_MESSAGE);
 }
 
+public void selectOption(HashMap<Integer, Button> b, int i)
+{
+	b.get(i).setOpaque(true);
+	b.get(i).setBackground(FONT_SELECT_GREEN);
+	b.get(i).setForeground(FONT_DARK_GREEN);
+}
 
+public void deselectOption(HashMap<Integer, Button> b)
+{
+	for (int i=1; i< b.size()+1; i++)
+	{
+		b.get(i).setOpaque(false);
+		b.get(i).setBackground(null);
+		b.get(i).setForeground(FONT_GREEN);
+	}
+}
 
 public class KeyboardListener implements KeyListener
 {
-	
+		
 	@Override
 	public void keyTyped(KeyEvent e) {}
 
@@ -260,15 +309,15 @@ public class KeyboardListener implements KeyListener
 			{
 				if (selected == 1)
 				{
-					buttons.get(selected).deselectOption();
+					deselectOption(buttons);
 					selected=buttons.size();
-					buttons.get(selected).selectOption();
+					selectOption(buttons, selected);
 					messageSound(soundFile1);
 				}
 				else {
-					buttons.get(selected).deselectOption();
+					deselectOption(buttons);
 					selected--;
-					buttons.get(selected).selectOption();
+					selectOption(buttons, selected);
 					messageSound(soundFile1);
 				}
 			}
@@ -279,15 +328,15 @@ public class KeyboardListener implements KeyListener
 			{
 				if (selected == buttons.size())
 				{
-					buttons.get(selected).deselectOption();
+					deselectOption(buttons);
 					selected=1;
-					buttons.get(selected).selectOption();
+					selectOption(buttons, selected);
 					messageSound(soundFile1);
 				}
 				else {
-					buttons.get(selected).deselectOption();
+					deselectOption(buttons);
 					selected++;
-					buttons.get(selected).selectOption();
+					selectOption(buttons, selected);
 					messageSound(soundFile1);
 				}
 			}
@@ -307,12 +356,6 @@ public class KeyboardListener implements KeyListener
 
 public class OptionButtonsMouseListener implements MouseListener
 {
-private HashMap<Integer, Button> btns;
-
-public OptionButtonsMouseListener(HashMap<Integer, Button> b)
-{
-	btns = b;
-}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
@@ -327,15 +370,16 @@ public OptionButtonsMouseListener(HashMap<Integer, Button> b)
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		for (int i = 1; i < buttons.size()+1; i++) btns.get(i).deselectOption();
+
+		deselectOption(buttons);
 		int i;
-		for (i = 1; i < btns.size()+1; i++)
+		for (i = 1; i < buttons.size()+1; i++)
 		{
-			if (e.getComponent() == btns.get(i))
+			if (e.getComponent() == buttons.get(i))
 				break;
 		}
 		selected = i;
-		btns.get(selected).selectOption();
+		selectOption(buttons, selected);
 		messageSound(soundFile1);
 	}
 
@@ -344,9 +388,10 @@ public OptionButtonsMouseListener(HashMap<Integer, Button> b)
 }
 
 
+
 public class FunctionButtonsMouseListener implements MouseListener
 {
-
+	
 	@SuppressWarnings("unchecked")
 	
 	@Override
@@ -362,42 +407,61 @@ public class FunctionButtonsMouseListener implements MouseListener
 
 	 		socket = new Socket();
 	 		try {
-	 			defaultCursor = getCursor();
 	 			setCursor(new Cursor(Cursor.WAIT_CURSOR));
 	 			socket.connect(new InetSocketAddress("127.0.0.1", 1201), 5000); // 5 sek. timeout
 	 			ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-
-	 			for (int i = 1; i < buttons.size(); i++) {
-	 				buttons.get(i).deselectOption();
-	 			}
-	 			
 	 			news = (HashMap<Integer, News>) ois.readObject();
-	 			
-	 			buttons = new HashMap<Integer, Button>();
-	 			setCursor(defaultCursor);
-	 				 			
-	 			for (int i = 1; i < news.size()+1; i++)
-	 			{
-					buttons.put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
-	 			}
-
-	 			
-	 			//selected = 1;
-	 			//buttons.get(selected).selectOption();
-				rysujButtony(buttons);
-				cPanel.repaint();
+	 			connected = true;
 	 		}
 
 	 		catch (IOException ioe)
 	 		{
-	 			ioe.printStackTrace();
-	 			zrzutLoga(ioe, true);
+	 			//ioe.printStackTrace();
+	 			zrzutLoga(ioe, false);
+	 			connected = false;
+	 			
+	 			setCursor(defaultCursor);
+	 			
+	 			JFrame d = new JFrame();
+	 			d.add(new JLabel("BLABLA"));
+	 			d.setSize(200, 200);
+	 			d.setLocationRelativeTo(null);
+	 			d.setBackground(Color.WHITE);
+	 			d.setForeground(Color.BLACK);
+	 			d.setVisible(true);
+
+	 			Timer timer = new Timer(2000, new ActionListener()
+	 			{
+					@Override
+					public void actionPerformed(ActionEvent e) {	
+					}
+	 			});
+	 			timer.setRepeats(false);
+	 			timer.start();
+	 			// TODO Do poprawki ten element, ma siê pojawiaæ 2 sek i znikac
+	 			d.setVisible(false);	 			
  			}
 	 		catch (ClassNotFoundException cnfe)
 	 		{
 	 			cnfe.printStackTrace();
 	 			zrzutLoga(cnfe, true);
 	 		}
+	 		
+	 		setCursor(defaultCursor);
+	 		
+ 			if (connected)
+ 			{
+ 				buttons = new HashMap<Integer, Button>();
+ 		 		for (int i = 1; i < news.size()+1; i++)
+ 	 			{
+ 					buttons.put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
+ 	 			}
+ 		 		
+ 				rysujButtony(buttons);
+ 				selectOption(buttons, selected);
+ 				bPanel.revalidate();
+ 				bPanel.repaint();	
+ 			}
  		}
  	}
 
@@ -443,5 +507,74 @@ public class FunctionButtonsMouseListener implements MouseListener
 		}
 	}
 	
+}
+
+
+public class Button extends JButton
+{
+
+private static final long serialVersionUID = 1L;
+
+private final Color FONT_GREEN = new Color(041,225,140);
+private final Color FONT_SELECT_GREEN = new Color(40, 180, 060);
+private final Color FONT_DARK_GREEN = new Color(5, 50, 5);
+private Image EXIT_BUTTONIMAGE;
+private Image HELP_BUTTONIMAGE;
+private Image REFRESH_BUTTONIMAGE;
+private ButtonTypes typ;
+private String text;
+
+
+public Button(ButtonTypes t, String txt)
+{
+	super();
+	typ = t;
+	text = txt;
+	try {
+	EXIT_BUTTONIMAGE = ImageIO.read(getClass().getResource("/res/power_button.png"));
+	HELP_BUTTONIMAGE = ImageIO.read(getClass().getResource("/res/help_button.png"));
+	REFRESH_BUTTONIMAGE = ImageIO.read(getClass().getResource("/res/refresh_button.png"));
+	}
+	catch (IOException ioe)
+	{
+		
+	}
+	setOpaque(false);
+	setContentAreaFilled(false);
+	setBorder(new EmptyBorder(5,5,5,5));	
+	if (typ == ButtonTypes.BOPTION) {
+		setHorizontalAlignment(SwingConstants.LEFT);
+		setForeground(FONT_GREEN);
+		setFont(VTNC_GUI.falloutFont);
+		setText(text);
+	}
+	setFocusable(false);
+}
+
+
+@Override
+protected void paintComponent(Graphics g)
+{
+	super.paintComponent(g);
+	switch (typ)
+	{
+	case BPOWER: {
+		g.drawImage(EXIT_BUTTONIMAGE, 0, 0, getWidth(), getHeight(), this);
+		break;
+	}
+	case BHELP: {
+		g.drawImage(HELP_BUTTONIMAGE, 0, 0, getWidth(), getHeight(), this);
+		break;
+	}
+	case BREFRESH: {
+		g.drawImage(REFRESH_BUTTONIMAGE, 0, 0, getWidth(), getHeight(), this);
+		break;
+	}
+	case BOPTION:
+		break;
+	default:
+		break;
+	}
+}
 }
 }
