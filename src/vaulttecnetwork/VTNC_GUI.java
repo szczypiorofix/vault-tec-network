@@ -77,7 +77,6 @@ private Clip beep;
 private final InputStream FALLOUT_FONT = getClass().getResourceAsStream("/res/FalloutFont.ttf");
 public static Font falloutFont = null;
 private JPanel cPanel, textPanel, bPanel;
-private JScrollPane bScroll;
 private Button bPower, bHelp, bRefresh;
 private HashMap<Integer, Button> buttons = new HashMap<Integer, Button>();
 private JTextArea terminalTextArea;
@@ -95,6 +94,8 @@ private Socket socket;
 private ObjectInputStream ois;
 private Cursor defaultCursor;
 private HashMap<Integer, News> news;
+private KeyboardListener keyboardListener;
+private OptionButtonsMouseListener optionButtonsMouseListener;
 
 
 
@@ -165,22 +166,15 @@ public VTNC_GUI()
 	
 	bPanel = new JPanel(null);
 	bPanel.setOpaque(false);
-	bPanel.setBounds(0, 0, 500, 200);
+	bPanel.setBounds(120, 300, 500, 300);
 	bPanel.setBorder(new LineBorder(Color.RED, 2, true));
-	
-	bScroll = new JScrollPane(bPanel);
-	bScroll.setBounds(120, 300, 500, 200);
-	
-	bScroll.setOpaque(false);
-	
-	
+		
 	cPanel.add(bPower);
 	cPanel.add(bHelp);
 	cPanel.add(bRefresh);
 	cPanel.add(textPanel);
 	news = new HashMap<Integer, News>();
-	this.addKeyListener(new KeyboardListener());
-	this.add(bScroll);
+	this.add(bPanel);
 	this.add(cPanel);
 	
 }
@@ -199,10 +193,22 @@ public void defineHelpWindow()
 
 public void rysujButtony(HashMap<Integer, Button> b)
 {
+	if (keyboardListener != null) this.removeKeyListener(keyboardListener);
+	if (optionButtonsMouseListener != null) this.removeMouseListener(optionButtonsMouseListener);
+	
 	for (int i = 1; i < buttons.size()+1; i++)
 	{
-		b.get(i).setBounds(10, i*50, 300, 40);
+		b.get(i).setBounds(10, (i*50) - 25 , 300, 40);
 		bPanel.add(b.get(i));
+	}
+	
+	keyboardListener = new KeyboardListener();
+	optionButtonsMouseListener = new OptionButtonsMouseListener();
+	
+	this.addKeyListener(keyboardListener);
+	for (int i = 1; i < buttons.size()+1; i++)
+	{
+		b.get(i).addMouseListener(optionButtonsMouseListener);	
 	}
 }
 
@@ -456,7 +462,7 @@ public class FunctionButtonsMouseListener implements MouseListener
  	 			{
  					buttons.put(i, new Button(ButtonTypes.BOPTION, "> " +news.get(i).getHeadline()));
  	 			}
- 		 		
+ 		 		bPanel.removeAll();
  				rysujButtony(buttons);
  				selectOption(buttons, selected);
  				bPanel.revalidate();
