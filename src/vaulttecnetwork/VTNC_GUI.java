@@ -7,10 +7,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,9 +16,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.AffineTransform;
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -40,24 +36,17 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.plaf.ComponentUI;
-import javax.swing.plaf.basic.BasicScrollBarUI;
-import javax.swing.plaf.metal.MetalScrollBarUI;
 
 
 public class VTNC_GUI extends JFrame {
@@ -425,27 +414,30 @@ public class FunctionButtonsMouseListener implements MouseListener
 	 			//ioe.printStackTrace();
 	 			zrzutLoga(ioe, false);
 	 			connected = false;
-	 			
 	 			setCursor(defaultCursor);
+	 			JWindow d = new JWindow();
+	 			d.setBounds(szerokosc - 300, wysokosc / 8, 250, 30);
+	 			d.setCursor(defaultCursor);
 	 			
-	 			JFrame d = new JFrame();
-	 			d.add(new JLabel("BLABLA"));
-	 			d.setSize(200, 200);
-	 			d.setLocationRelativeTo(null);
-	 			d.setBackground(Color.WHITE);
-	 			d.setForeground(Color.BLACK);
+	 			JPanel dPanel = new JPanel();
+	 			dPanel.setBorder(new LineBorder(FONT_GREEN, 2, true));
+	 			dPanel.setBackground(FONT_DARK_GREEN);
+	 			JLabel l = new JLabel("Brak po³¹czenia z serwerem !");
+	 			l.setForeground(FONT_GREEN);
+	 			dPanel.add(l);
+	 			d.add(dPanel, BorderLayout.CENTER);
 	 			d.setVisible(true);
-
-	 			Timer timer = new Timer(2000, new ActionListener()
+	 			Timer timer = new Timer(1, new ActionListener()
 	 			{
-					@Override
-					public void actionPerformed(ActionEvent e) {	
-					}
+	 				@Override
+	 				public void actionPerformed(ActionEvent e)
+	 				{
+	 					d.dispose();
+	 				}
 	 			});
 	 			timer.setRepeats(false);
+	 			timer.setInitialDelay(2000);
 	 			timer.start();
-	 			// TODO Do poprawki ten element, ma siê pojawiaæ 2 sek i znikac
-	 			d.setVisible(false);	 			
  			}
 	 		catch (ClassNotFoundException cnfe)
 	 		{
@@ -522,8 +514,8 @@ public class Button extends JButton
 private static final long serialVersionUID = 1L;
 
 private final Color FONT_GREEN = new Color(041,225,140);
-private final Color FONT_SELECT_GREEN = new Color(40, 180, 060);
-private final Color FONT_DARK_GREEN = new Color(5, 50, 5);
+//private final Color FONT_SELECT_GREEN = new Color(40, 180, 060);
+//private final Color FONT_DARK_GREEN = new Color(5, 50, 5);
 private Image EXIT_BUTTONIMAGE;
 private Image HELP_BUTTONIMAGE;
 private Image REFRESH_BUTTONIMAGE;
