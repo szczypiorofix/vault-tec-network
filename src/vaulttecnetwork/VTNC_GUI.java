@@ -165,17 +165,39 @@ public VTNC_GUI()
 	news = new HashMap<Integer, News>();
 	this.add(bPanel);
 	this.add(cPanel);
-	
+
+	this.addKeyListener(new KeyListener()
+	{
+		@Override
+		public void keyTyped(KeyEvent e) {}
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_F1) {
+				showHelp = !showHelp;
+				helpWindow.setVisible(showHelp);
+			}
+			else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) 
+				if (showHelp) {
+					showHelp = false;
+					helpWindow.setVisible(showHelp);
+				}
+				else exitProgram(true);
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {}		
+	});
 }
 
 public void defineHelpWindow()
 {
 	helpWindow = new JWindow();
-	helpWindow.setBounds(szerokosc - 350, wysokosc - 300, 300, 150);
+	helpWindow.setBounds(szerokosc - 320, wysokosc - 230, 280, 120);
 	helpWindow.setBackground(Color.BLACK);
 	helpWindow.setForeground(Color.WHITE);
 	helpWindow.setCursor(defaultCursor);
-	JTextArea helpWindowText = new JTextArea("  POMOC DLA PROGRAMU...\n\n  Strza³ki (góra/dó³) - poruszanie po menu\n  Enter - wybór opcji\n  Przycisk POWER - zamkniecie\n  Przycisk HELP (F1) - Pomoc");
+	JTextArea helpWindowText = new JTextArea("\n  HELP (F1)\n\n  ARROW UP/DOWN - move selection\n  ENTER - show highlighted news\n  POWER - close app");
 	helpWindowText.setEditable(false);
 	helpWindow.add(helpWindowText);
 }
@@ -285,6 +307,14 @@ public void deselectOption(HashMap<Integer, Button> b)
 	}
 }
 
+public void exitProgram(boolean b)
+{
+	if (b) {
+		// TODO Jakiœ system zapisywania niusów, ¿eby ich kilka razy nie pobieraæ (coœ jakby wersja offline).	
+	}	
+	System.exit(0);
+}
+
 public class KeyboardListener implements KeyListener
 {
 		
@@ -294,12 +324,7 @@ public class KeyboardListener implements KeyListener
 	@Override
 	public void keyPressed(KeyEvent e) {
 		
-		if (e.getKeyCode() == KeyEvent.VK_F1) {
-			showHelp = !showHelp;
-			helpWindow.setVisible(showHelp);
-		}
-		else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) System.exit(0);
-		else if (e.getKeyCode() == KeyEvent.VK_UP) {
+		if (e.getKeyCode() == KeyEvent.VK_UP) {
 			if ((selected >= 1))
 			{
 				if (selected == 1)
@@ -391,7 +416,9 @@ public class FunctionButtonsMouseListener implements MouseListener
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (e.getComponent() == bPower) System.exit(0);
+		if (e.getComponent() == bPower) {
+			exitProgram(true);
+		}
 		else if (e.getComponent() == bHelp) 
 			{
 				showHelp = !showHelp;
@@ -422,7 +449,8 @@ public class FunctionButtonsMouseListener implements MouseListener
 	 			JPanel dPanel = new JPanel();
 	 			dPanel.setBorder(new LineBorder(FONT_GREEN, 2, true));
 	 			dPanel.setBackground(FONT_DARK_GREEN);
-	 			JLabel l = new JLabel("Brak po³¹czenia z serwerem !");
+	 			JLabel l = new JLabel("Connection error!");
+	 			l.setFont(falloutFont.deriveFont(18f));
 	 			l.setForeground(FONT_GREEN);
 	 			dPanel.add(l);
 	 			d.add(dPanel, BorderLayout.CENTER);
