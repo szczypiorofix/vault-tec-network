@@ -3,7 +3,7 @@ package vaulttecnetwork;
 
 public class VaultTecNetworkClientMain {
 
-public VaultTecNetworkClientMain()
+private VaultTecNetworkClientMain()
 {
 	new VTNC_GUI().setVisible(true);
 }

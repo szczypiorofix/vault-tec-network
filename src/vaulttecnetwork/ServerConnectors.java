@@ -12,7 +12,7 @@ private ObjectInputStream inputStream;
 private ObjectOutputStream outputStream;
 
 
-/** Podstawowa klasa u¿ytkownika ³¹cz¹cego siê z serwerem.
+/** Podstawowa klasa uÅ¼ytkownika Å‚Ä…czÄ…cego siÄ™ z serwerem.
 
  * @param socket
  * @param inputStream

@@ -310,7 +310,7 @@ public void deselectOption(HashMap<Integer, Button> b)
 public void exitProgram(boolean b)
 {
 	if (b) {
-		// TODO Jakiœ system zapisywania niusów, ¿eby ich kilka razy nie pobieraæ (coœ jakby wersja offline).	
+		// TODO Jakiï¿½ system zapisywania niusï¿½w, ï¿½eby ich kilka razy nie pobieraï¿½ (coï¿½ jakby wersja offline).	
 	}	
 	System.exit(0);
 }
